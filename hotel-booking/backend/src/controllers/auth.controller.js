@@ -96,3 +96,37 @@ export const login = async (req, res, next) => {
     next(error);
   }
 };
+export const getProfile = async (req, res, next) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.role,
+              c.address, c.city, c.country, c.id_number
+       FROM users u
+       LEFT JOIN customers c ON c.user_id = u.id
+       WHERE u.id = ? LIMIT 1`,
+      [req.user.userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = rows[0];
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      phone: user.phone,
+      role: user.role,
+      customerDetails: {
+        address: user.address,
+        city: user.city,
+        country: user.country,
+        idNumber: user.id_number
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

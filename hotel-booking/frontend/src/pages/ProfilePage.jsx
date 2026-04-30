@@ -7,163 +7,124 @@ export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('info');
   const [form, setForm] = useState(null);
-  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
     api('/users/me').then((data) => {
       setForm({
-        firstName: data.first_name || '',
-        lastName: data.last_name || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        city: data.city || '',
-        country: data.country || 'Việt Nam',
-        idNumber: data.id_number || '',
         email: data.email || '',
-        status: data.status || 'Hoạt động'
+        address: data.address || '',
+        phone: data.phone || '',
+        city: data.city || '',
+        status: data.status || 'Hoạt động',
+        country: data.country || 'Việt Nam',
+        idNumber: data.id_number || ''
       });
     });
   }, []);
 
   if (!form) return <div style={{ textAlign: 'center', marginTop: '40px' }}>Đang tải dữ liệu...</div>;
 
-  const onUpdateInfo = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    try {
-      await api('/users/me', {
-        method: 'PUT',
-        body: JSON.stringify(form)
-      });
-      setMessage('Cập nhật thông tin thành công!');
-    } catch (err) {
-      setError(err.message || 'Lỗi cập nhật');
-    }
-  };
-
-  const onChangePassword = (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    if (passwordForm.new !== passwordForm.confirm) {
-      setError('Mật khẩu xác nhận không khớp.');
-      return;
-    }
-    // Stub for password change api
-    setMessage('Đổi mật khẩu thành công!');
-    setPasswordForm({ current: '', new: '', confirm: '' });
-  };
-
   return (
-    <div className="admin-layout" style={{ marginTop: '40px' }}>
-      <div className="sidebar card">
-        <h3 style={{ padding: '0 16px', marginBottom: '8px', color: 'var(--primary)' }}>
-          Xin chào, {form.lastName}
-        </h3>
-        <p style={{ padding: '0 16px', color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px' }}>
-          Trạng thái: <span className="badge badge-green">{form.status}</span>
-        </p>
+    <div className="container">
+      <div className="profile-layout">
+        <div>
+          <div className="profile-greeting">
+            Xin chào, {user?.first_name || 'Khách hàng'}
+          </div>
+          <div className="profile-sidebar">
+            <div className={`profile-nav-item ${activeTab === 'info' ? 'active' : ''}`} onClick={() => setActiveTab('info')}>
+              <i className="far fa-user" style={{width:'20px'}}></i> Thông tin cá nhân
+            </div>
+            <div className={`profile-nav-item ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
+              <i className="far fa-calendar-alt" style={{width:'20px'}}></i> Đơn đặt phòng
+            </div>
+            <div className={`profile-nav-item ${activeTab === 'security' ? 'active' : ''}`} onClick={() => setActiveTab('security')}>
+              <i className="fas fa-key" style={{width:'20px'}}></i> Đổi mật khẩu
+            </div>
+            <div className={`profile-nav-item ${activeTab === 'reviews' ? 'active' : ''}`} onClick={() => setActiveTab('reviews')}>
+              <i className="far fa-star" style={{width:'20px'}}></i> Đánh giá của tôi
+            </div>
+          </div>
+        </div>
 
-        <a href="#!" className={activeTab === 'info' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('info'); }}>
-          <span style={{ marginRight: '8px' }}>👤</span> Thông tin cá nhân
-        </a>
-        <a href="#!" className={activeTab === 'security' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('security'); }}>
-          <span style={{ marginRight: '8px' }}>🔒</span> Đổi mật khẩu
-        </a>
-        <Link to="/my-bookings">
-          <span style={{ marginRight: '8px' }}>📅</span> Đơn đặt phòng
-        </Link>
-        <a href="#!" onClick={(e) => { e.preventDefault(); }}>
-          <span style={{ marginRight: '8px' }}>⭐</span> Đánh giá của tôi
-        </a>
-        <a href="#!" onClick={(e) => { e.preventDefault(); logout(); }} style={{ color: 'var(--danger)', marginTop: '20px' }}>
-          <span style={{ marginRight: '8px' }}>🚪</span> Đăng xuất
-        </a>
-      </div>
-
-      <div className="card" style={{ padding: '32px' }}>
-        {message && <div className="success" style={{ padding: '12px', background: 'rgba(3, 162, 83, 0.1)', borderRadius: '8px', marginBottom: '20px' }}>{message}</div>}
-        {error && <div className="error" style={{ padding: '12px', background: 'rgba(210, 18, 46, 0.1)', borderRadius: '8px', marginBottom: '20px' }}>{error}</div>}
-
-        {activeTab === 'info' && (
-          <form className="form" onSubmit={onUpdateInfo}>
-            <h2 style={{ marginBottom: '20px', color: 'var(--text-dark)' }}>Chỉnh sửa thông tin cá nhân</h2>
-
-            <div className="grid2">
-              <div className="input-group">
-                <label className="input-label">Họ</label>
-                <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
+        <div>
+          {activeTab === 'info' && (
+            <>
+              <div className="profile-avatar-large">
+                <div className="profile-avatar-circle">
+                  <i className="far fa-user"></i>
+                </div>
               </div>
-              <div className="input-group">
-                <label className="input-label">Tên</label>
-                <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
-              </div>
+              <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '30px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Email</label>
+                  <input value={form.email} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Địa chỉ</label>
+                  <input value={form.address} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số điện thoại</label>
+                  <input value={form.phone} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Thành phố</label>
+                  <input value={form.city} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Trạng thái</label>
+                  <input value={form.status} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--success)' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Quốc gia</label>
+                  <input value={form.country} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số CMNN/CCCD</label>
+                  <input value={form.idNumber} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
+                </div>
+              </form>
+            </>
+          )}
+
+          {activeTab === 'bookings' && (
+            <div style={{ textAlign: 'center', marginTop: '40px' }}>
+              <i className="far fa-calendar-check" style={{ fontSize: '80px', color: '#1f2937', marginBottom: '20px' }}></i>
+              <p style={{ fontSize: '15px', color: '#1f2937' }}>Hiện tại chưa có đơn đặt phòng nào</p>
             </div>
+          )}
 
-            <div className="grid2">
-              <div className="input-group">
-                <label className="input-label">Email</label>
-                <input value={form.email} disabled style={{ backgroundColor: 'var(--bg-main)', cursor: 'not-allowed' }} />
-              </div>
-              <div className="input-group">
-                <label className="input-label">Số điện thoại</label>
-                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
-              </div>
+          {activeTab === 'security' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <i className="fas fa-key" style={{ fontSize: '60px', color: '#1f2937', marginBottom: '40px' }}></i>
+              <form style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Mật khẩu hiện tại</label>
+                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Mật khẩu mới</label>
+                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Xác nhận mật khẩu mới</label>
+                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
+                </div>
+                <button type="button" className="btn" style={{ margin: '30px auto 0', width: '200px', backgroundColor: 'var(--secondary)' }}>
+                  Đổi mật khẩu
+                </button>
+              </form>
             </div>
+          )}
 
-            <div className="input-group">
-              <label className="input-label">Địa chỉ</label>
-              <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
-            </div>
-
-            <div className="grid2">
-              <div className="input-group">
-                <label className="input-label">Thành phố</label>
-                <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
-              </div>
-              <div className="input-group">
-                <label className="input-label">Quốc gia</label>
-                <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="search-input">
-                  <option value="Việt Nam">Việt Nam</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Số CMND/CCCD</label>
-              <input value={form.idNumber} onChange={(e) => setForm({ ...form, idNumber: e.target.value })} required />
-            </div>
-
-            <button className="btn" type="submit" style={{ marginTop: '16px', alignSelf: 'flex-start' }}>Lưu thay đổi</button>
-          </form>
-        )}
-
-        {activeTab === 'security' && (
-          <form className="form" onSubmit={onChangePassword}>
-            <h2 style={{ marginBottom: '20px', color: 'var(--text-dark)' }}>Đổi mật khẩu bảo mật</h2>
-
-            <div className="input-group" style={{ maxWidth: '400px' }}>
-              <label className="input-label">Mật khẩu hiện tại</label>
-              <input type="password" value={passwordForm.current} onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })} required />
-            </div>
-
-            <div className="input-group" style={{ maxWidth: '400px' }}>
-              <label className="input-label">Mật khẩu mới</label>
-              <input type="password" value={passwordForm.new} onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })} required />
-            </div>
-
-            <div className="input-group" style={{ maxWidth: '400px' }}>
-              <label className="input-label">Xác nhận mật khẩu mới</label>
-              <input type="password" value={passwordForm.confirm} onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })} required />
-            </div>
-
-            <button className="btn" type="submit" style={{ marginTop: '16px', alignSelf: 'flex-start' }}>Đổi mật khẩu</button>
-          </form>
-        )}
+          {activeTab === 'reviews' && (
+            <div style={{textAlign:'center', marginTop: '40px'}}>Chưa có đánh giá nào.</div>
+          )}
+        </div>
       </div>
     </div>
   );

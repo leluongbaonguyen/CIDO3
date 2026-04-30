@@ -1,126 +1,247 @@
 CREATE DATABASE IF NOT EXISTS hotel_booking_db;
 USE hotel_booking_db;
 
-CREATE TABLE IF NOT EXISTS users (
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS maintenance_records;
+DROP TABLE IF EXISTS booking_items;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS discounts;
+DROP TABLE IF EXISTS room_images;
+DROP TABLE IF EXISTS rooms;
+DROP TABLE IF EXISTS seasonal_rates;
+DROP TABLE IF EXISTS room_type_amenities;
+DROP TABLE IF EXISTS room_types;
+DROP TABLE IF EXISTS amenities;
+DROP TABLE IF EXISTS employee_roles;
+DROP TABLE IF EXISTS employees;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 1.2.18. Bảng users
+CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  first_name VARCHAR(100) NOT NULL,
-  last_name VARCHAR(100) NOT NULL,
-  phone VARCHAR(30),
-  role ENUM('CUSTOMER', 'STAFF', 'ADMIN') NOT NULL DEFAULT 'CUSTOMER',
-  avatar VARCHAR(255),
-  status ENUM('ACTIVE', 'LOCKED', 'PENDING') NOT NULL DEFAULT 'ACTIVE',
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) UNIQUE,
+  role ENUM('Admin', 'Employee', 'Customer') NOT NULL DEFAULT 'Customer',
+  avatar VARCHAR(255) NULL,
+  status ENUM('Active', 'Locked', 'Suspended') NOT NULL DEFAULT 'Active',
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 );
 
-CREATE TABLE IF NOT EXISTS customers (
+-- 1.2.5. Bảng customers
+CREATE TABLE customers (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL UNIQUE,
-  address VARCHAR(255),
-  city VARCHAR(100),
-  country VARCHAR(100),
-  id_number VARCHAR(50),
+  address VARCHAR(255) NOT NULL,
+  city VARCHAR(255) NOT NULL,
+  country VARCHAR(255) NOT NULL,
+  id_number VARCHAR(255) NOT NULL UNIQUE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS room_types (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  base_price DECIMAL(10,2) NOT NULL,
-  max_occupancy INT NOT NULL,
-  photo_urls TEXT,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- 1.2.12. Bảng roles
+CREATE TABLE roles (
+  id INT AUTO_INCREMENT PRIMARY KEY, -- Changed from VARCHAR(255) to INT to match employee_roles
+  name VARCHAR(255) NOT NULL UNIQUE,
+  permissions JSON NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 );
 
-CREATE TABLE IF NOT EXISTS amenities (
+-- 1.2.7. Bảng employees
+CREATE TABLE employees (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  user_id INT NOT NULL UNIQUE,
+  position VARCHAR(255) NOT NULL,
+  department ENUM('Reception', 'Accounting', 'Management', 'Other') NOT NULL,
+  hire_date DATETIME(3) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS room_type_amenities (
+-- 1.2.8. Bảng employee_roles
+CREATE TABLE employee_roles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  employee_id INT NOT NULL,
+  role_id INT NOT NULL,
+  FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
+
+-- 1.2.1. Bảng amenities
+CREATE TABLE amenities (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT NOT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+);
+
+-- 1.2.15. Bảng room_types
+CREATE TABLE room_types (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT NOT NULL,
+  base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
+  max_occupancy INT NOT NULL CHECK (max_occupancy > 0),
+  photo_urls VARCHAR(255) NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+);
+
+-- 1.2.16. Bảng room_type_amenities
+CREATE TABLE room_type_amenities (
   id INT AUTO_INCREMENT PRIMARY KEY,
   room_type_id INT NOT NULL,
   amenity_id INT NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE,
   FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS rooms (
+-- 1.2.17. Bảng seasonal_rates
+CREATE TABLE seasonal_rates (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  room_number VARCHAR(50) NOT NULL UNIQUE,
-  floor SMALLINT NOT NULL,
-  status ENUM('AVAILABLE', 'BOOKED', 'IN_USE', 'MAINTENANCE') NOT NULL DEFAULT 'AVAILABLE',
-  notes TEXT,
+  start_date DATETIME(3) NOT NULL,
+  end_date DATETIME(3) NOT NULL,
+  multiplier DECIMAL(5,2) NOT NULL CHECK (multiplier > 0),
+  season_name VARCHAR(255) NOT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   room_type_id INT NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (room_type_id) REFERENCES room_types(id)
+  CHECK (end_date > start_date),
+  FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS room_images (
+-- 1.2.13. Bảng rooms
+CREATE TABLE rooms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  room_number VARCHAR(255) NOT NULL UNIQUE,
+  floor SMALLINT NOT NULL,
+  status ENUM('Available', 'Occupied', 'Reserved', 'Maintenance') NOT NULL DEFAULT 'Available',
+  notes TEXT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  room_type_id INT NOT NULL,
+  FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE
+);
+
+-- 1.2.14. Bảng room_images
+CREATE TABLE room_images (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image_url TEXT NOT NULL,
   room_id INT NOT NULL,
   FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS discounts (
+-- 1.2.6. Bảng discounts
+CREATE TABLE discounts (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  code VARCHAR(50) NOT NULL UNIQUE,
-  percentage DECIMAL(5,2) NOT NULL DEFAULT 0,
-  valid_from DATETIME,
-  valid_to DATETIME,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  code VARCHAR(255) NOT NULL UNIQUE,
+  percentage DECIMAL(5,2) NOT NULL,
+  valid_from DATETIME(3) NOT NULL,
+  valid_to DATETIME(3) NOT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 );
 
-CREATE TABLE IF NOT EXISTS bookings (
+-- 1.2.3. Bảng bookings
+CREATE TABLE bookings (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  booking_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  checkin_date DATETIME NOT NULL,
-  checkout_date DATETIME NOT NULL,
+  booking_date DATETIME(3) NOT NULL,
+  checkin_date DATETIME(3) NOT NULL,
+  checkout_date DATETIME(3) NOT NULL,
   total_guests SMALLINT NOT NULL,
-  special_requests TEXT,
-  status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
-  booking_source ENUM('WEBSITE', 'DIRECT', 'AGENT') NOT NULL DEFAULT 'WEBSITE',
-  total_amount DECIMAL(10,2) NOT NULL,
+  special_requests TEXT NULL,
+  status ENUM('Booked', 'Cancelled', 'Completed') NOT NULL DEFAULT 'Booked',
+  booking_source ENUM('Website', 'Direct', 'Agent') NOT NULL DEFAULT 'Website',
+  total_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   customer_id INT NOT NULL,
   discount_id INT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (customer_id) REFERENCES customers(id),
-  FOREIGN KEY (discount_id) REFERENCES discounts(id)
+  CHECK (checkout_date > checkin_date),
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+  FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS booking_items (
+-- 1.2.4. Bảng booking_items
+CREATE TABLE booking_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
   booking_id INT NOT NULL,
   room_id INT NOT NULL,
-  price DECIMAL(10,2) NOT NULL,
-  quantity INT NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+  quantity INT NOT NULL CHECK (quantity > 0),
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
-  FOREIGN KEY (room_id) REFERENCES rooms(id)
+  FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS payments (
+-- 1.2.9. Bảng maintenance_records
+CREATE TABLE maintenance_records (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  payment_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  payment_method ENUM('CASH', 'BANK_TRANSFER', 'VNPAY', 'CARD') NOT NULL,
-  transaction_id VARCHAR(100),
-  status ENUM('PENDING', 'SUCCESS', 'FAILED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+  description TEXT NOT NULL,
+  start_date DATETIME(3) NOT NULL,
+  end_date DATETIME(3) NOT NULL,
+  status ENUM('In_Progress', 'Completed', 'Cancelled') NOT NULL DEFAULT 'In_Progress',
+  cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+  notes TEXT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  room_id INT NOT NULL,
+  CHECK (end_date >= start_date),
+  FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+);
+
+-- 1.2.10. Bảng payments
+CREATE TABLE payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  payment_date DATETIME(3) NOT NULL,
+  payment_method ENUM('Cash', 'Card', 'Transfer') NOT NULL,
+  transaction_id INT NOT NULL UNIQUE,
+  status ENUM('Success', 'Pending', 'Failed', 'Cancelled') NOT NULL DEFAULT 'Pending',
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   booking_id INT NOT NULL,
-  amount DECIMAL(10,2) NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  amount DECIMAL(10,2) NOT NULL CHECK (amount >= 0),
   FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+
+-- 1.2.11. Bảng reviews
+CREATE TABLE reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT NOT NULL,
+  review_date DATETIME(3) NOT NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  update_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  customer_id INT NOT NULL,
+  booking_id INT NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+
+-- 1.2.2. Bảng audit_logs
+CREATE TABLE audit_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  action VARCHAR(255) NOT NULL,
+  entity VARCHAR(255) NOT NULL,
+  entity_id INT NOT NULL,
+  user_id INT NOT NULL,
+  user_type ENUM('Admin', 'Employee', 'Customer') NOT NULL,
+  details JSON NULL,
+  create_date DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

@@ -42,7 +42,17 @@ export default function MyBookingsPage() {
     }
   };
 
-  const cancel = async (id) => {
+  const cancel = async (id, checkinDate) => {
+    const checkin = new Date(checkinDate);
+    const now = new Date();
+    const diffTime = checkin - now;
+    const diffHours = diffTime / (1000 * 60 * 60);
+
+    if (diffHours < 24) {
+      alert('Chính sách: Khách hàng không thể hủy phòng trong vòng 24 giờ trước thời gian check-in.');
+      return;
+    }
+
     if (window.confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng này?')) {
       try {
         await api(`/bookings/${id}/cancel`, { method: 'PATCH' });
@@ -143,7 +153,7 @@ export default function MyBookingsPage() {
                     </button>
                   )}
                   {['PENDING', 'CONFIRMED'].includes(item.status) && (
-                    <button className="btn outline" onClick={() => cancel(item.id)} style={{ width: '100%', color: 'var(--danger)', borderColor: 'var(--danger)' }}>
+                    <button className="btn outline" onClick={() => cancel(item.id, item.checkin_date)} style={{ width: '100%', color: 'var(--danger)', borderColor: 'var(--danger)' }}>
                       Hủy đặt phòng
                     </button>
                   )}

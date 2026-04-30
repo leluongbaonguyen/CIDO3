@@ -1,76 +1,46 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/client';
+import { useState } from 'react';
 
 export default function AdminAmenitiesPage() {
-    const [items, setItems] = useState([]);
-    const [form, setForm] = useState({ name: '', description: '' });
-    const [showForm, setShowForm] = useState(false);
+  const [amenities, setAmenities] = useState([
+    { id: 1, name: 'Wifi tốc độ cao', icon: 'fa-wifi' },
+    { id: 2, name: 'Điều hòa nhiệt độ', icon: 'fa-snowflake' },
+    { id: 3, name: 'Bồn tắm', icon: 'fa-bath' },
+    { id: 4, name: 'Minibar', icon: 'fa-wine-glass-alt' },
+    { id: 5, name: 'Tivi màn hình phẳng', icon: 'fa-tv' },
+    { id: 6, name: 'Máy sấy tóc', icon: 'fa-wind' },
+  ]);
 
-    const load = async () => {
-        try {
-            const data = await api('/amenities');
-            setItems(data);
-        } catch (e) {
-            console.error(e);
-            setItems([
-                { id: 1, name: 'Wifi miễn phí', description: 'Tốc độ cao 5Ghz' },
-                { id: 2, name: 'Hồ bơi', description: 'Mở cửa từ 6h đến 22h' }
-            ]);
-        }
-    };
-
-    useEffect(() => { load(); }, []);
-
-    return (
+  return (
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ color: 'var(--text-dark)' }}>Quản lý Tiện Nghi</h2>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <input type="text" placeholder="Tìm kiếm..." className="search-input" style={{ width: '250px', padding: '10px 16px' }} />
-                    <button className="btn" onClick={() => setShowForm(!showForm)}>+ Thêm tiện nghi</button>
-                </div>
-            </div>
-
-            {showForm && (
-                <form className="card form" style={{ marginBottom: '24px' }}>
-                    <h3 style={{ marginBottom: '16px' }}>Thêm Tiện Nghi Mới</h3>
-                    <div className="input-group">
-                        <label className="input-label">Tên tiện nghi</label>
-                        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-                    </div>
-                    <div className="input-group">
-                        <label className="input-label">Mô tả chi tiết</label>
-                        <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-                    </div>
-                    <button className="btn">Lưu tiện nghi</button>
-                </form>
-            )}
-
-            <div className="card" style={{ overflowX: 'auto', padding: '0' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ background: 'var(--bg-main)', borderBottom: '2px solid var(--border-light)' }}>
-                            <th style={{ padding: '16px', fontWeight: '600' }}>ID</th>
-                            <th style={{ padding: '16px', fontWeight: '600' }}>Tên Tiện Nghi</th>
-                            <th style={{ padding: '16px', fontWeight: '600' }}>Mô tả</th>
-                            <th style={{ padding: '16px', fontWeight: '600', textAlign: 'right' }}>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {items.map((t) => (
-                            <tr key={t.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                <td style={{ padding: '16px', fontWeight: '500' }}>#{t.id}</td>
-                                <td style={{ padding: '16px', fontWeight: '600' }}>{t.name}</td>
-                                <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{t.description}</td>
-                                <td style={{ padding: '16px', textAlign: 'right' }}>
-                                    <button className="btn outline" style={{ padding: '6px 12px', fontSize: '13px', marginRight: '8px' }}>Sửa</button>
-                                    <button className="btn danger" style={{ padding: '6px 12px', fontSize: '13px' }}>Xóa</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Quản lý tiện nghi</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Quản lý danh sách các tiện ích đi kèm trong phòng khách sạn.</p>
         </div>
-    );
+        <button style={{ backgroundColor: '#0ea5e9', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+          <i className="fas fa-plus"></i> Thêm tiện nghi
+        </button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+        {amenities.map((item) => (
+          <div key={item.id} style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#f0f9ff', color: '#0ea5e9', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px' }}>
+                <i className={`fas ${item.icon}`}></i>
+              </div>
+              <div>
+                <div style={{ fontWeight: '700', color: '#1e293b' }}>{item.name}</div>
+                <div style={{ fontSize: '12px', color: '#94a3b8' }}>Icon: {item.icon}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
+              <button style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}><i className="fas fa-trash-alt"></i></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
