@@ -1,80 +1,69 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '../api/client';
 
 export default function AdminOverview() {
-  const [period, setPeriod] = useState('Month');
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    totalBookings: 0,
+    occupancyRate: 0,
+    totalCustomers: 0,
+    monthlyRevenue: []
+  });
+
+  const loadStats = async () => {
+    try {
+      const data = await api('/admin/dashboard');
+      setStats(data);
+    } catch (error) {
+      console.error('Lỗi tải thống kê:', error);
+    }
+  };
+
+  useEffect(() => { loadStats(); }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Header with Filter */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', animation: 'fadeIn 0.5s ease-out' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Bảng điều khiển tổng quan</h2>
-          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Chào mừng trở lại! Đây là tóm tắt hoạt động kinh doanh của bạn.</p>
-        </div>
-        
-        <div style={{ display: 'flex', backgroundColor: '#fff', borderRadius: '8px', padding: '4px', border: '1px solid #e2e8f0' }}>
-          {['Week', 'Month', 'Year'].map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              style={{
-                padding: '8px 16px',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                backgroundColor: period === p ? '#0ea5e9' : 'transparent',
-                color: period === p ? '#fff' : '#64748b',
-                transition: 'all 0.2s'
-              }}
-            >
-              {p === 'Week' ? 'Tuần' : p === 'Month' ? 'Tháng' : 'Năm'}
-            </button>
-          ))}
+          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Dữ liệu kinh doanh thời gian thực từ hệ thống XTravel.</p>
         </div>
       </div>
 
-      {/* Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-        <MetricCard title="Tổng doanh thu" value="1.250.000.000 ₫" icon="fa-wallet" color="#0ea5e9" trend="+12.5%" />
-        <MetricCard title="Đơn đặt phòng" value="156" icon="fa-calendar-check" color="#10b981" trend="+8.2%" />
-        <MetricCard title="Phòng đang ở" value="42/50" icon="fa-bed" color="#f59e0b" trend="84%" />
-        <MetricCard title="Khách hàng mới" value="1,240" icon="fa-users" color="#8b5cf6" trend="+15%" />
+        <MetricCard title="Tổng doanh thu" value={`${Number(stats.totalRevenue).toLocaleString()} ₫`} icon="fa-wallet" color="#0ea5e9" trend="Thực tế" />
+        <MetricCard title="Đơn đặt phòng" value={stats.totalBookings} icon="fa-calendar-check" color="#10b981" trend="Tất cả" />
+        <MetricCard title="Tỷ lệ lấp đầy" value={`${stats.occupancyRate}%`} icon="fa-bed" color="#f59e0b" trend="Hiện tại" />
+        <MetricCard title="Khách hàng" value={stats.totalCustomers} icon="fa-users" color="#8b5cf6" trend="Thành viên" />
       </div>
 
-      {/* Charts Section */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-        {/* Revenue Line Chart (Simulated) */}
         <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Biểu đồ doanh thu</h3>
-            <i className="fas fa-ellipsis-h" style={{ color: '#94a3b8', cursor: 'pointer' }}></i>
-          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '24px' }}>Doanh thu 6 tháng gần nhất</h3>
           <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '20px', padding: '0 20px' }}>
-            {/* Simulated bar/line chart bars */}
-            {[40, 60, 45, 80, 55, 90, 70, 85, 60, 95, 75, 100].map((h, i) => (
-              <div key={i} style={{ flex: 1, backgroundColor: '#0ea5e9', height: `${h}%`, borderRadius: '4px 4px 0 0', opacity: 0.8, position: 'relative' }}>
-                <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: '#94a3b8' }}>T{i+1}</div>
+            {stats.monthlyRevenue.length > 0 ? stats.monthlyRevenue.map((item, i) => (
+              <div key={i} style={{ flex: 1, backgroundColor: '#0ea5e9', height: `${Math.min(100, (item.total / (stats.totalRevenue || 1)) * 500)}%`, minHeight: '10%', borderRadius: '4px 4px 0 0', opacity: 0.8, position: 'relative' }}>
+                <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{item.month}</div>
+                <div style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: '10px', fontWeight: '600', color: '#1e293b' }}>{Math.round(item.total/1000000)}M</div>
               </div>
-            ))}
+            )) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#94a3b8' }}>Chưa có dữ liệu hàng tháng</div>
+            )}
           </div>
         </div>
 
-        {/* Room Occupancy Pie Chart (Simulated) */}
         <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '24px' }}>Tỷ lệ lấp đầy</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '24px' }}>Phân bổ trạng thái</h3>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-            <div style={{ width: '180px', height: '180px', borderRadius: '50%', background: 'conic-gradient(#0ea5e9 0% 65%, #10b981 65% 85%, #f59e0b 85% 100%)', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+            <div style={{ width: '180px', height: '180px', borderRadius: '50%', background: `conic-gradient(#0ea5e9 0% ${stats.occupancyRate}%, #e2e8f0 ${stats.occupancyRate}% 100%)`, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
                <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: '700', fontSize: '24px', color: '#1e293b' }}>
-                 84%
+                 {stats.occupancyRate}%
                </div>
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <LegendItem color="#0ea5e9" label="Phòng Suite" value="65%" />
-            <LegendItem color="#10b981" label="Phòng Deluxe" value="20%" />
-            <LegendItem color="#f59e0b" label="Phòng Standard" value="15%" />
+            <LegendItem color="#0ea5e9" label="Phòng đang sử dụng" value={`${stats.occupancyRate}%`} />
+            <LegendItem color="#e2e8f0" label="Phòng còn trống" value={`${100 - stats.occupancyRate}%`} />
           </div>
         </div>
       </div>
@@ -89,13 +78,13 @@ function MetricCard({ title, value, icon, color, trend }) {
         <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: `${color}15`, display: 'flex', justifyContent: 'center', alignItems: 'center', color: color }}>
           <i className={`fas ${icon}`} style={{ fontSize: '20px' }}></i>
         </div>
-        <span style={{ fontSize: '12px', fontWeight: '600', padding: '4px 8px', borderRadius: '4px', backgroundColor: trend.includes('+') ? '#dcfce7' : '#fef3c7', color: trend.includes('+') ? '#166534' : '#92400e' }}>
+        <span style={{ fontSize: '11px', fontWeight: '700', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', textTransform: 'uppercase' }}>
           {trend}
         </span>
       </div>
       <div>
         <h4 style={{ fontSize: '14px', color: '#64748b', fontWeight: '500', marginBottom: '4px', margin: 0 }}>{title}</h4>
-        <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b' }}>{value}</div>
+        <div style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b' }}>{value}</div>
       </div>
     </div>
   );

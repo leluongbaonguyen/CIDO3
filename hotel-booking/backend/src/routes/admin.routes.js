@@ -13,6 +13,8 @@ import {
   listRoomTypes,
   listAmenities,
   listReviews,
+  deleteReview,
+  updateUserStatus,
   listSupport
 } from '../controllers/admin.controller.js';
 import { protect, authorize } from '../middlewares/auth.js';
@@ -39,6 +41,11 @@ router.get('/roles', protect, authorize('ADMIN'), listRoles);
 router.get('/room-types', protect, authorize('ADMIN', 'STAFF'), listRoomTypes);
 router.get('/amenities', protect, authorize('ADMIN', 'STAFF'), listAmenities);
 router.get('/reviews', protect, authorize('ADMIN', 'STAFF'), listReviews);
+router.delete('/reviews/:reviewId', protect, authorize('ADMIN'), deleteReview);
+
+// User Status Management
+router.patch('/users/:userId/status', protect, authorize('ADMIN'), updateUserStatus);
+
 router.get('/support', protect, authorize('ADMIN', 'STAFF'), listSupport);
 
 export default router;
