@@ -196,8 +196,20 @@ export const cancelBooking = async (req, res, next) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    if (rows[0].status === 'CANCELLED') {
+    const booking = rows[0];
+    if (booking.status === 'CANCELLED') {
       return res.status(400).json({ message: 'Booking already cancelled' });
+    }
+
+    // Business Logic: Only allow cancellation if more than 24h before check-in
+    const checkinTime = new Date(booking.checkin_date).getTime();
+    const now = new Date().getTime();
+    const hoursLeft = (checkinTime - now) / (1000 * 60 * 60);
+
+    if (hoursLeft < 24 && booking.status !== 'PENDING') {
+      return res.status(400).json({ 
+        message: 'Cannot cancel booking within 24 hours of check-in. Please contact support.' 
+      });
     }
 
     await pool.query("UPDATE bookings SET status = 'CANCELLED' WHERE id = ?", [bookingId]);
