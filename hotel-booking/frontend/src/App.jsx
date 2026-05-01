@@ -11,6 +11,7 @@ import MyBookingsPage from './pages/MyBookingsPage';
 import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
 import GalleryPage from './pages/GalleryPage';
+import BookingPage from './pages/BookingPage';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -38,11 +39,12 @@ export default function App() {
           <Route path="/rooms/:id" element={<RoomDetailPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
+          <Route path="/booking" element={<BookingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
 
-          <Route path="/admin" element={<ProtectedRoute roles={['ADMIN', 'STAFF']}><AdminDashboard /></ProtectedRoute>}>
+          <Route path="/admin" element={<ProtectedRoute roles={['ADMIN', 'EMPLOYEE']}><AdminDashboard /></ProtectedRoute>}>
             <Route index element={<AdminOverview />} />
             <Route path="rooms" element={<AdminRoomsPage />} />
             <Route path="bookings" element={<AdminBookingsPage />} />

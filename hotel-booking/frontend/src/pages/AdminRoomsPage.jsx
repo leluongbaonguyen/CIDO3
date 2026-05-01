@@ -91,73 +91,81 @@ export default function AdminRoomsPage() {
     r.room_type_name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const getStatusStyle = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
-      case 'AVAILABLE': return { color: '#10b981', backgroundColor: '#dcfce7' };
-      case 'OCCUPIED': return { color: '#ef4444', backgroundColor: '#fee2e2' };
-      case 'MAINTENANCE': return { color: '#f59e0b', backgroundColor: '#fef3c7' };
-      default: return { color: '#64748b', backgroundColor: '#f1f5f9' };
+      case 'AVAILABLE': return <span style={{ padding: '6px 12px', borderRadius: '50px', background: '#dcfce7', color: '#166534', fontSize: '12px', fontWeight: '700' }}>CÓ SẴN</span>;
+      case 'OCCUPIED': return <span style={{ padding: '6px 12px', borderRadius: '50px', background: '#fee2e2', color: '#991b1b', fontSize: '12px', fontWeight: '700' }}>ĐANG Ở</span>;
+      case 'MAINTENANCE': return <span style={{ padding: '6px 12px', borderRadius: '50px', background: '#fef3c7', color: '#92400e', fontSize: '12px', fontWeight: '700' }}>BẢO TRÌ</span>;
+      default: return <span>{status}</span>;
     }
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+    <div style={{ animation: 'fadeInUp 0.6s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Quản lý danh sách phòng</h2>
-          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Quản lý toàn bộ hệ thống phòng vật lý và trạng thái vận hành.</p>
+          <h2 style={{ fontSize: '28px', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-1px' }}>Quản lý phòng nghỉ</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Kiểm soát trạng thái thực tế của 100 phòng tại resort.</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          style={{ backgroundColor: '#0ea5e9', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgb(14 165 233 / 0.3)' }}
-        >
-          <i className="fas fa-plus"></i> Thêm phòng mới
+        <button onClick={() => handleOpenModal()} className="btn-premium">
+          <i className="fas fa-plus"></i> Khởi tạo phòng mới
         </button>
       </div>
 
-      <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-          <input 
-            type="text" 
-            placeholder="Tìm theo số phòng hoặc loại..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '300px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }} 
-          />
+      <div className="premium-table-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+           <div style={{ position: 'relative' }}>
+              <i className="fas fa-search" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}></i>
+              <input 
+                type="text" placeholder="Tìm số phòng, tầng hoặc loại..." value={search} onChange={(e) => setSearch(e.target.value)}
+                style={{ width: '350px', paddingLeft: '44px !important', background: '#f8fafc !important' }} 
+              />
+           </div>
+           <div style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }}>Tổng số: {filteredRooms.length} phòng</div>
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table>
           <thead>
-            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <th style={{ padding: '16px 24px', textAlign: 'left' }}>Số phòng</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left' }}>Tầng</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left' }}>Loại phòng</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left' }}>Giá gốc</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left' }}>Trạng thái</th>
-              <th style={{ padding: '16px 24px', textAlign: 'center' }}>Hành động</th>
+            <tr>
+              <th>Số phòng</th>
+              <th>Vị trí</th>
+              <th>Hạng phòng</th>
+              <th>Giá niêm yết</th>
+              <th>Vận hành</th>
+              <th style={{ textAlign: 'center' }}>Tác vụ</th>
             </tr>
           </thead>
           <tbody>
             {filteredRooms.map((room) => (
-              <tr key={room.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '16px 24px', fontWeight: '700' }}>{room.room_number}</td>
-                <td style={{ padding: '16px 24px' }}>{room.floor}</td>
-                <td style={{ padding: '16px 24px' }}>{room.room_type_name}</td>
-                <td style={{ padding: '16px 24px' }}>{Number(room.base_price).toLocaleString()}đ</td>
-                <td style={{ padding: '16px 24px' }}>
-                  <select 
-                    value={room.status} 
-                    onChange={(e) => handleStatusChange(room.id, e.target.value)}
-                    style={{ ...getStatusStyle(room.status), border: 'none', padding: '6px 12px', borderRadius: '20px', fontWeight: '600', cursor: 'pointer' }}
-                  >
-                    <option value="AVAILABLE">Trống</option>
-                    <option value="OCCUPIED">Đang ở</option>
-                    <option value="MAINTENANCE">Bảo trì</option>
-                  </select>
+              <tr key={room.id} className="table-row">
+                <td style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '16px' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: room.status === 'AVAILABLE' ? '#10b981' : '#ef4444' }}></div>
+                      {room.room_number}
+                   </div>
                 </td>
-                <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                  <button onClick={() => handleOpenModal(room)} style={{ color: '#0ea5e9', marginRight: '10px', background: 'none', border: 'none', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
-                  <button onClick={() => handleDelete(room.id)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}><i className="fas fa-trash"></i></button>
+                <td>Tầng {room.floor}</td>
+                <td>
+                   <div style={{ fontWeight: '700', color: 'var(--primary)' }}>{room.room_type_name}</div>
+                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>XTRAVEL Original</div>
+                </td>
+                <td style={{ fontWeight: '700' }}>{Number(room.base_price).toLocaleString()}đ</td>
+                <td>
+                   <select 
+                     value={room.status} 
+                     onChange={(e) => handleStatusChange(room.id, e.target.value)}
+                     style={{ border: 'none !important', background: 'transparent !important', padding: '0 !important', fontWeight: '700', color: 'var(--primary)', cursor: 'pointer', width: 'auto !important' }}
+                   >
+                     <option value="AVAILABLE">Sẵn sàng đón khách</option>
+                     <option value="OCCUPIED">Khách đang lưu trú</option>
+                     <option value="MAINTENANCE">Đang bảo trì/Sửa chữa</option>
+                   </select>
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                   <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                      <button onClick={() => handleOpenModal(room)} style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f1f5f9', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
+                      <button onClick={() => handleDelete(room.id)} style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', border: 'none', color: '#ef4444', cursor: 'pointer' }}><i className="fas fa-trash"></i></button>
+                   </div>
                 </td>
               </tr>
             ))}
@@ -166,33 +174,35 @@ export default function AdminRoomsPage() {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', width: '450px', borderRadius: '16px', padding: '32px' }}>
-            <h3 style={{ margin: 0 }}>{editingRoom ? 'Sửa thông tin phòng' : 'Thêm phòng mới'}</h3>
-            <div style={{ display: 'grid', gap: '16px', marginTop: '24px' }}>
-                <div>
-                    <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Số phòng</label>
-                    <input required placeholder="Ví dụ: 101" value={formData.room_number} onChange={e => setFormData({...formData, room_number: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }} />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.3s' }}>
+          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', width: '500px', borderRadius: '24px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary)', marginBottom: '32px' }}>{editingRoom ? 'Hiệu chỉnh thông tin' : 'Thiết lập phòng mới'}</h3>
+            <div style={{ display: 'grid', gap: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                   <div>
+                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Số phòng</label>
+                       <input required placeholder="101" value={formData.room_number} onChange={e => setFormData({...formData, room_number: e.target.value})} style={{ width: '100%' }} />
+                   </div>
+                   <div>
+                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Tầng</label>
+                       <input required type="number" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} style={{ width: '100%' }} />
+                   </div>
                 </div>
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Tầng</label>
-                    <input required type="number" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Loại phòng</label>
-                    <select required value={formData.room_type_id} onChange={e => setFormData({...formData, room_type_id: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #ddd' }}>
-                        <option value="">-- Chọn loại phòng --</option>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Hạng phòng</label>
+                    <select required value={formData.room_type_id} onChange={e => setFormData({...formData, room_type_id: e.target.value})} style={{ width: '100%' }}>
+                        <option value="">-- Chọn hạng phòng niêm yết --</option>
                         {roomTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                     </select>
                 </div>
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>Ghi chú</label>
-                    <textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', height: '80px' }} />
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Ghi chú vận hành</label>
+                    <textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} style={{ width: '100%', height: '100px', padding: '12px', borderRadius: '12px', border: '2px solid #f1f5f9' }} />
                 </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>Hủy</button>
-              <button type="submit" style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#0ea5e9', color: '#fff', cursor: 'pointer' }}>Lưu lại</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '40px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '14px 28px', borderRadius: '12px', border: 'none', background: '#f1f5f9', fontWeight: '700', cursor: 'pointer' }}>ĐÓNG</button>
+              <button type="submit" className="btn-accent" style={{ padding: '14px 28px' }}>XÁC NHẬN LƯU</button>
             </div>
           </form>
         </div>

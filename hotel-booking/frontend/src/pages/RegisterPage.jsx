@@ -25,90 +25,107 @@ export default function RegisterPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
-      // Mock registration
-      const data = {
-        token: 'mock-token-reg',
-        user: { ...form, role: 'CUSTOMER' }
-      };
+      const data = await api('/auth/register', {
+        method: 'POST',
+        body: form
+      });
       login(data);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
-      <div style={{ backgroundColor: '#fff', padding: '48px', borderRadius: '20px', boxShadow: 'var(--shadow-lg)', width: '100%', maxWidth: '700px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '12px' }}>Tham gia XTRAVEL</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Đăng ký để nhận những ưu đãi đặc biệt và quản lý kỳ nghỉ của bạn</p>
+    <div style={{ 
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80")',
+      backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative',
+      padding: '40px 20px'
+    }}>
+      {/* Dark Overlay */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.7) 100%)' }}></div>
+
+      <div className="glass-effect" style={{ 
+        padding: '60px', borderRadius: '32px', width: '100%', maxWidth: '850px', 
+        position: 'relative', zIndex: 10, animation: 'fadeInUp 0.8s ease-out' 
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{ 
+            width: '70px', height: '70px', background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%)', 
+            borderRadius: '20px', display: 'flex', justifyContent: 'center', 
+            alignItems: 'center', margin: '0 auto 24px', boxShadow: '0 15px 30px rgba(196,166,97,0.3)' 
+          }}>
+             <i className="fas fa-crown" style={{ color: '#fff', fontSize: '32px' }}></i>
+          </div>
+          <h2 style={{ fontSize: '42px', fontWeight: '900', color: '#fff', marginBottom: '12px', letterSpacing: '-1px' }} className="serif">KHỞI ĐẦU KỲ NGHỈ TRONG MƠ</h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '16px' }}>Trở thành thành viên XTRAVEL để nhận đặc quyền thượng lưu</p>
         </div>
 
-        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {error && <div style={{ padding: '12px', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', fontSize: '14px' }}>{error}</div>}
+        <form onSubmit={onSubmit}>
+          {error && (
+            <div style={{ 
+              padding: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', 
+              color: '#fca5a5', borderRadius: '12px', marginBottom: '32px', fontSize: '14px', textAlign: 'center' 
+            }}>
+              <i className="fas fa-exclamation-triangle" style={{ marginRight: '8px' }}></i> {error}
+            </div>
+          )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Họ</label>
-              <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+            {/* Left Column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <InputGroup label="Họ" value={form.lastName} onChange={v => setForm({...form, lastName: v})} placeholder="Nguyễn" />
+                  <InputGroup label="Tên" value={form.firstName} onChange={v => setForm({...form, firstName: v})} placeholder="Văn A" />
+               </div>
+               <InputGroup label="Email liên hệ" type="email" value={form.email} onChange={v => setForm({...form, email: v})} placeholder="example@xtravel.com" />
+               <InputGroup label="Mật khẩu bảo mật" type="password" value={form.password} onChange={v => setForm({...form, password: v})} placeholder="••••••••" />
+               <InputGroup label="Số điện thoại" value={form.phone} onChange={v => setForm({...form, phone: v})} placeholder="0901 234 567" />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Tên</label>
-              <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Email</label>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
+            {/* Right Column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+               <InputGroup label="Địa chỉ hiện tại" value={form.address} onChange={v => setForm({...form, address: v})} placeholder="Số 1, đường ABC..." />
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <InputGroup label="Thành phố" value={form.city} onChange={v => setForm({...form, city: v})} placeholder="Đà Nẵng" />
+                  <InputGroup label="Quốc gia" value={form.country} onChange={v => setForm({...form, country: v})} placeholder="Việt Nam" />
+               </div>
+               <InputGroup label="Số CMND / CCCD" value={form.idNumber} onChange={v => setForm({...form, idNumber: v})} placeholder="0480 9900..." />
+               
+               <div style={{ marginTop: 'auto' }}>
+                  <button type="submit" disabled={loading} className="btn-accent" style={{ width: '100%', padding: '18px', fontSize: '16px', letterSpacing: '1px', opacity: loading ? 0.7 : 1 }}>
+                    {loading ? 'ĐANG KHỞI TẠO...' : 'XÁC NHẬN ĐĂNG KÝ'}
+                  </button>
+               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số điện thoại</label>
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Mật khẩu</label>
-              <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số CMND/CCCD</label>
-              <input value={form.idNumber} onChange={(e) => setForm({ ...form, idNumber: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Địa chỉ</label>
-            <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Thành phố</label>
-              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Quốc gia</label>
-              <input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} required style={{ padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)' }} />
-            </div>
-          </div>
-
-          <button type="submit" disabled={loading} style={{ width: '100%', backgroundColor: 'var(--secondary)', color: '#fff', border: 'none', padding: '16px', borderRadius: '8px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', marginTop: '12px', transition: 'all 0.2s' }} onMouseEnter={e => e.target.style.backgroundColor = 'var(--secondary-hover)'} onMouseLeave={e => e.target.style.backgroundColor = 'var(--secondary)'}>
-            {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG KÝ TÀI KHOẢN'}
-          </button>
-
-          <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
-            Đã có tài khoản? <Link to="/login" style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'none' }}>Đăng nhập ngay</Link>
           </div>
         </form>
+
+        <div style={{ textAlign: 'center', marginTop: '40px', color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
+          Bạn đã có tài khoản thành viên? <Link to="/login" style={{ color: 'var(--accent)', fontWeight: '700', textDecoration: 'none' }}>Đăng nhập tại đây</Link>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function InputGroup({ label, type = 'text', value, onChange, placeholder }) {
+  return (
+    <div>
+      <label className="luxury-label">{label}</label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+        className="luxury-input"
+      />
     </div>
   );
 }

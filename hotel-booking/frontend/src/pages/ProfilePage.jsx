@@ -1,131 +1,122 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/client';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('info');
-  const [form, setForm] = useState(null);
+  
+  const [profileData, setProfileData] = useState({
+    firstName: user?.first_name || '',
+    lastName: user?.last_name || '',
+    email: user?.email || '',
+    phone: '0901 234 567',
+    birthday: '1995-10-20',
+    gender: 'Nam',
+    address: 'Sơn Trà, Đà Nẵng',
+    idCard: '048095001234'
+  });
 
   useEffect(() => {
-    api('/users/me').then((data) => {
-      setForm({
-        email: data.email || '',
-        address: data.address || '',
-        phone: data.phone || '',
-        city: data.city || '',
-        status: data.status || 'Hoạt động',
-        country: data.country || 'Việt Nam',
-        idNumber: data.id_number || ''
-      });
-    });
-  }, []);
-
-  if (!form) return <div style={{ textAlign: 'center', marginTop: '40px' }}>Đang tải dữ liệu...</div>;
+    if (!user) navigate('/login');
+    window.scrollTo(0, 0);
+  }, [user, navigate]);
 
   return (
-    <div className="container">
-      <div className="profile-layout">
-        <div>
-          <div className="profile-greeting">
-            Xin chào, {user?.first_name || 'Khách hàng'}
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingTop: '120px', paddingBottom: '80px' }}>
+      <div className="container">
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '40px' }}>
+          
+          {/* USER SIDEBAR */}
+          <aside style={{ height: 'fit-content' }}>
+             <div className="card-luxury" style={{ padding: '40px 30px', textAlign: 'center' }}>
+                <div style={{ 
+                   width: '80px', height: '80px', borderRadius: '50%', background: 'var(--gold)', 
+                   margin: '0 auto 20px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                   fontSize: '32px', color: '#fff', fontWeight: '800', boxShadow: '0 10px 20px rgba(196,166,97,0.3)'
+                }}>
+                   {user?.first_name?.[0] || 'U'}
+                </div>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary)', marginBottom: '5px' }}>{user?.first_name} {user?.last_name}</h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '30px' }}>{user?.email}</p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                   <MenuButton icon="far fa-user-circle" label="Thông tin cá nhân" active={activeTab === 'info'} onClick={() => setActiveTab('info')} />
+                   <Link to="/my-bookings" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-muted)', fontWeight: '600' }}>
+                      <i className="fas fa-calendar-check"></i> Đơn đặt phòng
+                   </Link>
+                   <MenuButton icon="fas fa-shield-alt" label="Bảo mật tài khoản" active={activeTab === 'security'} onClick={() => setActiveTab('security')} />
+                </div>
+             </div>
+          </aside>
+
+          {/* MAIN CONTENT */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+             {activeTab === 'info' && (
+                <div className="card-luxury" style={{ padding: '40px' }}>
+                   <h2 style={{ fontSize: '28px', fontWeight: '900', color: 'var(--primary)', marginBottom: '35px' }}>Chi tiết hồ sơ</h2>
+                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
+                      <LuxuryInput label="Họ" value={profileData.lastName} />
+                      <LuxuryInput label="Tên" value={profileData.firstName} />
+                      <LuxuryInput label="Email" value={profileData.email} disabled />
+                      <LuxuryInput label="Số điện thoại" value={profileData.phone} />
+                      <LuxuryInput label="Ngày sinh" type="date" value={profileData.birthday} />
+                      <LuxuryInput label="Giới tính" type="select" options={['Nam', 'Nữ', 'Khác']} value={profileData.gender} />
+                      <LuxuryInput label="Số CCCD/CMND" value={profileData.idCard} />
+                      <LuxuryInput label="Địa chỉ" value={profileData.address} span="2" />
+                   </div>
+                   <button className="btn-gold" style={{ marginTop: '40px', width: '250px', padding: '18px' }}>LƯU THAY ĐỔI</button>
+                </div>
+             )}
+
+             {activeTab === 'security' && (
+                <div className="card-luxury" style={{ padding: '40px' }}>
+                   <h2 style={{ fontSize: '28px', fontWeight: '900', color: 'var(--primary)', marginBottom: '35px' }}>Đổi mật khẩu</h2>
+                   <div style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <LuxuryInput label="Mật khẩu hiện tại" type="password" />
+                      <LuxuryInput label="Mật khẩu mới" type="password" />
+                      <LuxuryInput label="Xác nhận mật khẩu mới" type="password" />
+                      <button className="btn-gold" style={{ marginTop: '20px', width: '250px', padding: '18px' }}>CẬP NHẬT MẬT KHẨU</button>
+                   </div>
+                </div>
+             )}
           </div>
-          <div className="profile-sidebar">
-            <div className={`profile-nav-item ${activeTab === 'info' ? 'active' : ''}`} onClick={() => setActiveTab('info')}>
-              <i className="far fa-user" style={{width:'20px'}}></i> Thông tin cá nhân
-            </div>
-            <div className={`profile-nav-item ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
-              <i className="far fa-calendar-alt" style={{width:'20px'}}></i> Đơn đặt phòng
-            </div>
-            <div className={`profile-nav-item ${activeTab === 'security' ? 'active' : ''}`} onClick={() => setActiveTab('security')}>
-              <i className="fas fa-key" style={{width:'20px'}}></i> Đổi mật khẩu
-            </div>
-            <div className={`profile-nav-item ${activeTab === 'reviews' ? 'active' : ''}`} onClick={() => setActiveTab('reviews')}>
-              <i className="far fa-star" style={{width:'20px'}}></i> Đánh giá của tôi
-            </div>
-          </div>
-        </div>
 
-        <div>
-          {activeTab === 'info' && (
-            <>
-              <div className="profile-avatar-large">
-                <div className="profile-avatar-circle">
-                  <i className="far fa-user"></i>
-                </div>
-              </div>
-              <form style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '30px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Email</label>
-                  <input value={form.email} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Địa chỉ</label>
-                  <input value={form.address} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số điện thoại</label>
-                  <input value={form.phone} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Thành phố</label>
-                  <input value={form.city} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Trạng thái</label>
-                  <input value={form.status} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--success)' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Quốc gia</label>
-                  <input value={form.country} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: 'span 2' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Số CMNN/CCCD</label>
-                  <input value={form.idNumber} readOnly style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} />
-                </div>
-              </form>
-            </>
-          )}
-
-          {activeTab === 'bookings' && (
-            <div style={{ textAlign: 'center', marginTop: '40px' }}>
-              <i className="far fa-calendar-check" style={{ fontSize: '80px', color: '#1f2937', marginBottom: '20px' }}></i>
-              <p style={{ fontSize: '15px', color: '#1f2937' }}>Hiện tại chưa có đơn đặt phòng nào</p>
-            </div>
-          )}
-
-          {activeTab === 'security' && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <i className="fas fa-key" style={{ fontSize: '60px', color: '#1f2937', marginBottom: '40px' }}></i>
-              <form style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Mật khẩu hiện tại</label>
-                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Mật khẩu mới</label>
-                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-dark)' }}>Xác nhận mật khẩu mới</label>
-                  <input style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-dark)' }} type="password" />
-                </div>
-                <button type="button" className="btn" style={{ margin: '30px auto 0', width: '200px', backgroundColor: 'var(--secondary)' }}>
-                  Đổi mật khẩu
-                </button>
-              </form>
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div style={{textAlign:'center', marginTop: '40px'}}>Chưa có đánh giá nào.</div>
-          )}
         </div>
       </div>
     </div>
   );
 }
+
+function MenuButton({ icon, label, active, onClick }) {
+  return (
+    <div onClick={onClick} style={{ 
+      display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', borderRadius: '12px', 
+      cursor: 'pointer', transition: '0.3s',
+      background: active ? 'var(--primary)' : 'transparent', color: active ? '#fff' : 'var(--text-muted)',
+      fontWeight: active ? '700' : '600',
+      boxShadow: active ? '0 10px 20px rgba(15,23,42,0.1)' : 'none'
+    }}>
+       <i className={icon} style={{ width: '20px' }}></i>
+       <span>{label}</span>
+    </div>
+  );
+}
+
+function LuxuryInput({ label, value, type = "text", options, span = "1", disabled }) {
+  return (
+    <div style={{ gridColumn: `span ${span}` }}>
+       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</label>
+       {type === 'select' ? (
+         <select style={inputStyle}>{options.map(opt => <option key={opt}>{opt}</option>)}</select>
+       ) : (
+         <input type={type} defaultValue={value} disabled={disabled} style={{ ...inputStyle, background: disabled ? '#f8fafc' : '#fff' }} />
+       )}
+    </div>
+  );
+}
+
+const inputStyle = {
+  width: '100%', padding: '15px 20px', borderRadius: '12px', border: '1.5px solid #f1f5f9', fontSize: '15px', outline: 'none', transition: '0.3s', fontWeight: '600', color: 'var(--primary)'
+};

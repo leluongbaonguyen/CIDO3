@@ -1,127 +1,137 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import Chatbot from './Chatbot';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith('/admin');
 
-  if (isAdminPath) {
-    return (
-      <div className="xtravel-layout">
-        <main className="main-content" style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
-          {children}
-        </main>
-      </div>
-    );
-  }
+  const isHome = location.pathname === '/';
+  const isAdmin = location.pathname.includes('/admin');
 
   return (
-    <div className="xtravel-layout">
-      <header className="xtravel-header" style={{ position: 'sticky', top: 0, zIndex: 1000, backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', height: '80px' }}>
-          
-          {/* Logo Section */}
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img src="/logo.png" alt="XTRAVEL Logo" style={{ height: '40px', borderRadius: '8px' }} />
-            <span style={{ fontSize: '26px', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-0.5px' }}>XTRAVEL</span>
-          </Link>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      
+      {/* LUXURY STICKY HEADER - HIDE ON ADMIN */}
+      {!isAdmin && (
+        <header style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+          backgroundColor: isHome ? 'rgba(10, 15, 29, 0.8)' : '#0a0f1d',
+          backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(196, 166, 97, 0.2)',
+          padding: '15px 0', transition: '0.4s'
+        }}>
+          <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
+               <div style={{ width: '40px', height: '40px', background: 'var(--gold)', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px', color: '#fff' }}>
+                  <i className="fas fa-h-square"></i>
+               </div>
+               <span style={{ fontSize: '24px', fontWeight: '900', color: '#fff', letterSpacing: '2px' }}>XTRAVEL</span>
+            </Link>
 
-          {/* Center Navigation */}
-          <nav style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-            <NavLink to="/" className="nav-item" style={({isActive}) => ({ color: isActive ? 'var(--primary)' : 'var(--text-dark)', fontWeight: isActive ? '700' : '600', textDecoration: 'none', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' })}>Trang chủ</NavLink>
-            <NavLink to="/about" className="nav-item" style={({isActive}) => ({ color: isActive ? 'var(--primary)' : 'var(--text-dark)', fontWeight: isActive ? '700' : '600', textDecoration: 'none', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' })}>Giới thiệu</NavLink>
-            <NavLink to="/rooms" className="nav-item" style={({isActive}) => ({ color: isActive ? 'var(--primary)' : 'var(--text-dark)', fontWeight: isActive ? '700' : '600', textDecoration: 'none', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' })}>Phòng</NavLink>
-            <NavLink to="/blog" className="nav-item" style={({isActive}) => ({ color: isActive ? 'var(--primary)' : 'var(--text-dark)', fontWeight: isActive ? '700' : '600', textDecoration: 'none', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' })}>Bài viết</NavLink>
-            <NavLink to="/gallery" className="nav-item" style={({isActive}) => ({ color: isActive ? 'var(--primary)' : 'var(--text-dark)', fontWeight: isActive ? '700' : '600', textDecoration: 'none', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' })}>Thư viện ảnh</NavLink>
-          </nav>
+            <nav style={{ display: 'flex', gap: '35px', alignItems: 'center' }}>
+               <NavLink to="/" label="HOME" />
+               <NavLink to="/rooms" label="ROOMS" />
+               <NavLink to="/gallery" label="GALLERY" />
+               <NavLink to="/blog" label="BLOG" />
+               <NavLink to="/about" label="ABOUT" />
+               {(user?.role === 'ADMIN' || user?.role === 'EMPLOYEE') && (
+                  <NavLink to="/admin" label="DASHBOARD" style={{ color: 'var(--gold)' }} />
+               )}
+            </nav>
 
-          {/* Right Actions & Social */}
-          <div style={{ display: 'flex', alignItems: 'stretch' }}>
-            {!user ? (
-              <div style={{ display: 'flex', alignItems: 'center', paddingRight: '24px', gap: '16px' }}>
-                <Link to="/login" style={{ color: 'var(--text-dark)', fontWeight: '600', fontSize: '14px', textDecoration: 'none' }}>Đăng nhập</Link>
-                <Link to="/register" style={{ padding: '8px 20px', borderRadius: '4px', color: '#fff', backgroundColor: 'var(--secondary)', fontWeight: '600', fontSize: '14px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseEnter={e => e.target.style.backgroundColor = 'var(--secondary-hover)'} onMouseLeave={e => e.target.style.backgroundColor = 'var(--secondary)'}>Đặt ngay</Link>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', paddingRight: '24px', gap: '24px' }}>
-                <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dark)', fontWeight: '600', textDecoration: 'none' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <i className="fas fa-user"></i>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+               {user ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '5px 15px', borderRadius: '50px', border: '1px solid rgba(196, 166, 97, 0.3)' }}>
+                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--gold)', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '12px', fontWeight: '800' }}>{(user?.firstName || user?.first_name || 'U')[0]}</div>
+                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: '700' }}>{user?.firstName || user?.first_name || 'User'}</span>
+                     </Link>
+                     <button onClick={logout} style={{ background: 'transparent', border: 'none', color: 'var(--gold)', cursor: 'pointer', fontSize: '12px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <i className="fas fa-sign-out-alt"></i> ĐĂNG XUẤT
+                     </button>
                   </div>
-                  {user.firstName || user.first_name || 'Khách hàng'}
-                </Link>
-                {(user.role === 'ADMIN' || user.role === 'STAFF') && (
-                  <Link to="/admin" style={{ padding: '8px 16px', borderRadius: '4px', color: '#fff', backgroundColor: 'var(--danger)', fontWeight: '600', fontSize: '14px', textDecoration: 'none', transition: 'all 0.2s' }}>
-                    <i className="fas fa-cogs" style={{ marginRight: '8px' }}></i>
-                    Trang quản trị
-                  </Link>
-                )}
-                <button onClick={logout} style={{ padding: '8px 16px', borderRadius: '4px', color: 'var(--text-dark)', backgroundColor: 'transparent', border: '1px solid var(--border-light)', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>Đăng xuất</button>
-              </div>
-            )}
-            
-            {/* Social Block matching design */}
-            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1e3a8a', padding: '0 24px', gap: '16px', color: '#fff', fontSize: '16px' }}>
-              <a href="#" style={{ color: '#fff', textDecoration: 'none' }}><i className="fab fa-facebook-f"></i></a>
-              <a href="#" style={{ color: '#fff', textDecoration: 'none' }}><i className="fab fa-twitter"></i></a>
-              <a href="#" style={{ color: '#fff', textDecoration: 'none' }}><i className="fab fa-instagram"></i></a>
-              <a href="#" style={{ color: '#fff', textDecoration: 'none' }}><i className="fab fa-youtube"></i></a>
+               ) : (
+                  <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: '700', fontSize: '13px', letterSpacing: '1px' }}>SIGN IN</Link>
+               )}
+               <button onClick={() => navigate('/rooms')} className="btn-gold" style={{ padding: '12px 25px', fontSize: '11px' }}>BOOK NOW</button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="main-content" style={{ backgroundColor: 'var(--bg-main)' }}>{children}</main>
+      {/* MAIN CONTENT - NO PADDING IF ADMIN */}
+      <main style={{ flex: 1, paddingTop: (isHome || isAdmin) ? '0' : '80px' }}>
+        {children}
+      </main>
 
-      <footer style={{ backgroundColor: 'var(--bg-surface)', padding: '60px 0 20px', borderTop: '1px solid var(--border-light)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px' }}>
-            <div style={{ maxWidth: '300px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                <img src="/logo.png" alt="XTRAVEL Logo" style={{ height: '30px', borderRadius: '6px', filter: 'grayscale(100%) opacity(0.7)' }} />
-                <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '-0.5px' }}>XTRAVEL</span>
+      {/* LUXURY FOOTER - HIDE ON ADMIN */}
+      {!isAdmin && (
+        <footer style={{ background: '#0a0f1d', color: '#fff', padding: '100px 0 50px', borderTop: '1px solid rgba(196, 166, 97, 0.2)' }}>
+          <div className="container">
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '60px', marginBottom: '80px' }}>
+              <div>
+                 <h3 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)', marginBottom: '25px', letterSpacing: '2px' }}>XTRAVEL</h3>
+                 <p style={{ opacity: 0.6, lineHeight: '1.8', fontSize: '14px' }}>Nơi hội tụ của sự sang trọng và tinh tế. Chúng tôi mang đến những trải nghiệm nghỉ dưỡng đẳng cấp quốc tế tại trung tâm thành phố biển Đà Nẵng.</p>
+                 <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
+                    <SocialIcon icon="fab fa-facebook-f" />
+                    <SocialIcon icon="fab fa-instagram" />
+                    <SocialIcon icon="fab fa-twitter" />
+                 </div>
               </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Nơi lưu trú tuyệt vời mang lại cho bạn những trải nghiệm nghỉ dưỡng hoàn hảo nhất với dịch vụ chuẩn 5 sao.</p>
+              <div>
+                 <FooterTitle label="Quick Links" />
+                 <FooterLink to="/rooms" label="Luxury Rooms" />
+                 <FooterLink to="/gallery" label="Photo Gallery" />
+                 <FooterLink to="/about" label="Our Story" />
+                 <FooterLink to="/blog" label="Travel Blog" />
+              </div>
+              <div>
+                 <FooterTitle label="Services" />
+                 <FooterLink to="/" label="Spa & Wellness" />
+                 <FooterLink to="/" label="Fine Dining" />
+                 <FooterLink to="/" label="Infinity Pool" />
+                 <FooterLink to="/" label="Events" />
+              </div>
+              <div>
+                 <FooterTitle label="Newsletter" />
+                 <p style={{ fontSize: '13px', opacity: 0.6, marginBottom: '20px' }}>Nhận thông tin ưu đãi mới nhất từ chúng tôi.</p>
+                 <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '5px', border: '1px solid rgba(196, 166, 97, 0.2)' }}>
+                    <input type="text" placeholder="Email Address" style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', padding: '10px', outline: 'none' }} />
+                    <button style={{ background: 'var(--gold)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>JOIN</button>
+                 </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '80px' }}>
-              <div>
-                <h4 style={{ marginBottom: '20px', color: 'var(--text-dark)' }}>Về XTRAVEL</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
-                  <li>Cách đặt phòng</li>
-                  <li>Liên hệ chúng tôi</li>
-                  <li>Trợ giúp</li>
-                  <li>Tuyển dụng</li>
-                </ul>
-              </div>
-              <div>
-                <h4 style={{ marginBottom: '20px', color: 'var(--text-dark)' }}>Dịch vụ</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
-                  <li>Phòng nghỉ</li>
-                  <li>Nhà hàng</li>
-                  <li>Spa & Massage</li>
-                  <li>Phòng hội nghị</li>
-                </ul>
-              </div>
-              <div>
-                <h4 style={{ marginBottom: '20px', color: 'var(--text-dark)' }}>Khác</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
-                  <li>Khách hàng thân thiết</li>
-                  <li>Tin tức & Sự kiện</li>
-                  <li>Chính sách bảo mật</li>
-                  <li>Điều khoản sử dụng</li>
-                </ul>
-              </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '40px', textAlign: 'center', fontSize: '12px', opacity: 0.4 }}>
+               &copy; 2026 XTRAVEL LUXURY RESORT. ALL RIGHTS RESERVED.
             </div>
           </div>
-          <div style={{ textAlign: 'center', paddingTop: '20px', borderTop: '1px solid var(--border-light)', color: 'var(--text-light)', fontSize: '14px' }}>
-            &copy; 2026 XTRAVEL. All rights reserved.
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
+    </div>
+  );
+}
 
-      <Chatbot />
+function NavLink({ to, label, style = {} }) {
+  return (
+    <Link to={to} style={{ textDecoration: 'none', color: '#fff', fontSize: '13px', fontWeight: '700', letterSpacing: '1px', opacity: 0.8, transition: '0.3s', ...style }} onMouseEnter={e => e.target.style.color = 'var(--gold)'} onMouseLeave={e => e.target.style.color = style.color || '#fff'}>
+       {label}
+    </Link>
+  );
+}
+
+function FooterTitle({ label }) {
+  return <h4 style={{ color: '#fff', fontWeight: '800', marginBottom: '25px', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '2px' }}>{label}</h4>;
+}
+
+function FooterLink({ to, label }) {
+  return <Link to={to} style={{ display: 'block', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', marginBottom: '15px', fontSize: '14px', transition: '0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--gold)'} onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.5)'}>{label}</Link>;
+}
+
+function SocialIcon({ icon }) {
+  return (
+    <div style={{ width: '35px', height: '35px', borderRadius: '50%', border: '1px solid rgba(196, 166, 97, 0.3)', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: '0.3s' }} onMouseEnter={e => {e.target.style.background = 'var(--gold)'; e.target.style.color = '#fff'}}>
+       <i className={icon} style={{ fontSize: '14px' }}></i>
     </div>
   );
 }

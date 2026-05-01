@@ -1,148 +1,215 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api } from '../api/client';
+import { getRooms, getRoomTypes, getAmenities } from '../api/roomApi';
 
 export default function RoomsPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rooms, setRooms] = useState([]);
-  
-  const [filters, setFilters] = useState({
-    keyword: searchParams.get('keyword') || '',
-    guests: searchParams.get('guests') || '',
-    minPrice: '',
-    maxPrice: '',
-    checkin: searchParams.get('checkin') || '',
-    checkout: searchParams.get('checkout') || '',
-    roomType: 'ALL'
-  });
-  const [loading, setLoading] = useState(false);
+  const [roomTypes, setRoomTypes] = useState([]);
+  const [amenities, setAmenities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const loadRooms = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filters.keyword) params.append('keyword', filters.keyword);
-      if (filters.guests) params.append('guests', filters.guests);
-      if (filters.minPrice) params.append('minPrice', filters.minPrice);
-      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
-      if (filters.checkin) params.append('checkin', filters.checkin);
-      if (filters.checkout) params.append('checkout', filters.checkout);
+  // Extract filters from URL
+  const selectedTypes = searchParams.get('roomTypeIds')?.split(',').filter(Boolean) || [];
+  const selectedAmenities = searchParams.get('amenityIds')?.split(',').filter(Boolean) || [];
 
-      const data = await api(`/rooms?${params.toString()}`);
-      setRooms(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const checkIn = searchParams.get('checkIn');
+  const checkOut = searchParams.get('checkOut');
+  const adults = searchParams.get('adults') || 2;
+  const children = searchParams.get('children') || 0;
+  const roomsCount = searchParams.get('rooms') || 1;
 
   useEffect(() => {
-    loadRooms();
+    const init = async () => {
+      try {
+        const [typesData, amenitiesData] = await Promise.all([
+          getRoomTypes(),
+          getAmenities()
+        ]);
+        setRoomTypes(typesData);
+        setAmenities(amenitiesData);
+      } catch (err) {
+        console.error('Failed to load filters:', err);
+      }
+    };
+    init();
   }, []);
 
-  const displayedRooms = filters.roomType === 'ALL'
-    ? rooms
-    : rooms.filter(r => r.room_type_name?.toLowerCase().includes(filters.roomType.toLowerCase()));
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        setLoading(true);
+        const params = Object.fromEntries([...searchParams]);
+        const data = await getRooms(params);
+        setRooms(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getImageUrl = (photoUrls) => {
-    try {
-      if (!photoUrls) return 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80';
-      const parsed = JSON.parse(photoUrls);
-      return parsed[0] || 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=80';
-    } catch (e) {
-      return photoUrls; // In case it's a raw string
+    fetchRooms();
+  }, [searchParams]);
+
+  const handleFilterToggle = (id, type) => {
+    const current = type === 'roomType' ? [...selectedTypes] : [...selectedAmenities];
+    const index = current.indexOf(id.toString());
+    
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(id.toString());
     }
+
+    const newParams = new URLSearchParams(searchParams);
+    const paramKey = type === 'roomType' ? 'roomTypeIds' : 'amenityIds';
+    
+    if (current.length > 0) {
+      newParams.set(paramKey, current.join(','));
+    } else {
+      newParams.delete(paramKey);
+    }
+    
+    setSearchParams(newParams);
   };
 
+  if (loading) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--black)' }}>
+      <div className="loader"></div>
+      <style>{`
+        .loader { width: 50px; height: 50px; border: 3px solid var(--gold); border-bottom-color: transparent; border-radius: 50%; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
-
-      <div className="card" style={{ marginBottom: '32px', padding: '24px', background: 'var(--bg-surface)' }}>
-        <h2 style={{ marginBottom: '16px', color: 'var(--text-dark)' }}>Tìm kiếm phòng</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Từ khóa</label>
-            <input type="text" placeholder="VD: Standard, Deluxe..." value={filters.keyword} onChange={(e) => setFilters({ ...filters, keyword: e.target.value })} style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Ngày nhận phòng</label>
-            <input type="date" value={filters.checkin} onChange={(e) => setFilters({ ...filters, checkin: e.target.value })} style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Ngày trả phòng</label>
-            <input type="date" value={filters.checkout} onChange={(e) => setFilters({ ...filters, checkout: e.target.value })} style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Số khách</label>
-            <input type="number" min="1" placeholder="VD: 2" value={filters.guests} onChange={(e) => setFilters({ ...filters, guests: e.target.value })} style={{ width: '100%' }} />
-          </div>
+    <div style={{ backgroundColor: '#fff', minHeight: '100vh', padding: '60px 0' }}>
+      <div className="container">
+        
+        {/* TOP SUMMARY */}
+        <div style={{ background: 'var(--black)', padding: '30px 45px', borderRadius: '32px', color: '#fff', marginBottom: '50px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(196, 166, 97, 0.3)', boxShadow: '0 30px 60px rgba(0,0,0,0.2)' }}>
+           <div>
+              <span style={{ color: 'var(--gold)', fontWeight: '800', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Available Sanctuaries</span>
+              <h3 className="serif" style={{ fontSize: '28px', fontWeight: '900', color: '#fff', marginTop: '5px' }}>
+                {rooms.length > 0 ? `We found ${rooms.length} rooms for you` : 'No rooms available for these filters'}
+              </h3>
+              <p style={{ fontSize: '14px', opacity: 0.6, marginTop: '10px' }}>
+                <i className="far fa-calendar-alt" style={{ color: 'var(--gold)', marginRight: '8px' }}></i> {checkIn} to {checkOut} | 
+                <i className="far fa-user" style={{ color: 'var(--gold)', marginLeft: '15px', marginRight: '8px' }}></i> {adults} Adults, {children} Children | 
+                <i className="fas fa-bed" style={{ color: 'var(--gold)', marginLeft: '15px', marginRight: '8px' }}></i> {roomsCount} Rooms
+              </p>
+           </div>
+           <div>
+              <Link to="/" className="btn-gold" style={{ padding: '12px 30px', fontSize: '11px', borderRadius: '12px' }}>MODIFY SEARCH</Link>
+           </div>
         </div>
 
-        <div style={{ marginTop: '16px', display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Lọc theo loại phòng</label>
-            <select value={filters.roomType} onChange={(e) => setFilters({ ...filters, roomType: e.target.value })} style={{ width: '100%' }}>
-              <option value="ALL">Tất cả loại phòng</option>
-              <option value="Standard">Standard (Tiêu chuẩn)</option>
-              <option value="Superior">Superior (Nâng cao)</option>
-              <option value="Deluxe">Deluxe (Sang trọng)</option>
-              <option value="Suite">Suite (Cao cấp)</option>
-            </select>
-          </div>
-          <button onClick={loadRooms} disabled={loading} style={{ backgroundColor: 'var(--secondary)', color: '#fff', border: 'none', padding: '12px 32px', fontSize: '16px', borderRadius: '8px', cursor: 'pointer', height: '48px', fontWeight: '600', transition: 'all 0.2s' }} onMouseEnter={e => e.target.style.backgroundColor = 'var(--secondary-hover)'} onMouseLeave={e => e.target.style.backgroundColor = 'var(--secondary)'}>
-            {loading ? 'Đang tìm...' : 'Tìm kiếm'}
-          </button>
-        </div>
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '60px' }}>
+          
+          {/* LEFT: FILTERS */}
+          <div className="animate-fade-up">
+            <div style={{ background: 'var(--gray-light)', borderRadius: '32px', padding: '40px', position: 'sticky', top: '120px' }}>
+               <h4 className="serif" style={{ fontSize: '22px', fontWeight: '800', marginBottom: '30px' }}>Refine By</h4>
+               
+               <FilterGroup 
+                 title="HẠNG PHÒNG" 
+                 options={roomTypes} 
+                 selected={selectedTypes} 
+                 onToggle={(id) => handleFilterToggle(id, 'roomType')} 
+               />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '20px', color: 'var(--text-dark)' }}>Kết quả tìm kiếm ({displayedRooms.length})</h3>
-      </div>
+               <FilterGroup 
+                 title="TIỆN NGHI" 
+                 options={amenities} 
+                 selected={selectedAmenities} 
+                 onToggle={(id) => handleFilterToggle(id, 'amenity')} 
+               />
 
-      {displayedRooms.length === 0 && !loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-          <i className="fas fa-search" style={{ fontSize: '48px', marginBottom: '16px', color: 'var(--border-light)' }}></i>
-          <h3>Không tìm thấy phòng nào phù hợp</h3>
-          <p>Hãy thử thay đổi tiêu chí tìm kiếm hoặc xóa bộ lọc.</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-          {displayedRooms.map((room) => (
-            <div key={room.id} style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }}>
-              <Link to={`/rooms/${room.id}`}>
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={getImageUrl(room.photo_urls)}
-                    alt={room.room_type_name}
-                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
-                  />
-                  {room.status === 'AVAILABLE' && (
-                    <span className="badge badge-green" style={{ position: 'absolute', top: '12px', right: '12px', fontSize: '12px' }}>Phòng trống</span>
-                  )}
-                </div>
-                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', height: 'calc(100% - 200px)' }}>
-                  <h3 style={{ fontSize: '16px', color: 'var(--text-dark)', margin: '0 0 8px 0', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {room.room_type_name || 'Phòng Standard'}
-                  </h3>
-                  <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <i className="fas fa-users" style={{ color: 'var(--text-light)' }}></i> {room.max_occupancy || 2} khách
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
-                    <div>
-                      <span style={{ fontSize: '12px', color: 'var(--text-light)' }}>Giá / đêm / phòng</span>
-                      <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--secondary)' }}>
-                        {Number(room.base_price || 0).toLocaleString('vi-VN')} ₫
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+               <button 
+                onClick={() => setSearchParams({ checkIn, checkOut, adults, children, rooms: roomsCount })}
+                style={{ width: '100%', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '12px', borderRadius: '12px', fontSize: '11px', fontWeight: '800', cursor: 'pointer', marginTop: '20px' }}>
+                 RESET FILTERS
+               </button>
             </div>
-          ))}
+          </div>
+
+          {/* RIGHT: LIST */}
+          <div className="animate-fade-up">
+             {error ? (
+               <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>{error}</div>
+             ) : rooms.length === 0 ? (
+               <div style={{ textAlign: 'center', padding: '100px', background: '#f8fafc', borderRadius: '32px' }}>
+                 <i className="fas fa-search" style={{ fontSize: '50px', color: 'var(--gold)', marginBottom: '20px', opacity: 0.3 }}></i>
+                 <h3 className="serif" style={{ fontSize: '24px' }}>No Rooms Available</h3>
+                 <p style={{ color: 'var(--gray)', marginTop: '10px' }}>Hãy thử thay đổi tiêu chí lọc hoặc ngày đặt phòng.</p>
+                 <Link to="/" className="btn-gold" style={{ marginTop: '30px', display: 'inline-block' }}>Quay lại trang chủ</Link>
+               </div>
+             ) : (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                  {rooms.map(room => (
+                    <div key={room.id} className="card-luxury" style={{ display: 'grid', gridTemplateColumns: '380px 1fr 260px' }}>
+                      
+                      <div className="img-zoom-container" style={{ height: '320px', borderRadius: '0' }}>
+                         <img src={room.photo_urls?.split(',')[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={room.room_type_name} />
+                         <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'var(--gold)', color: '#fff', padding: '8px 15px', borderRadius: '8px', fontSize: '11px', fontWeight: '800' }}>{room.room_number}</div>
+                      </div>
+
+                      <div style={{ padding: '40px', display: 'flex', flexDirection: 'column' }}>
+                         <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>FLOOR {room.floor}</span>
+                         <h3 className="serif" style={{ fontSize: '28px', fontWeight: '900', color: 'var(--black)', marginBottom: '15px' }}>{room.room_type_name}</h3>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                            <span style={{ fontSize: '14px', color: 'var(--gray)', fontWeight: '600' }}><i className="fas fa-users" style={{ color: 'var(--gold)' }}></i> Max {room.max_occupancy} Guests</span>
+                         </div>
+                         <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.6', marginBottom: '20px' }}>{room.description?.substring(0, 100)}...</p>
+                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: 'auto' }}>
+                            <span style={{ background: '#f1f5f9', color: '#475569', padding: '6px 12px', borderRadius: '6px', fontSize: '10px', fontWeight: '700' }}>{room.status}</span>
+                         </div>
+                      </div>
+
+                      <div style={{ padding: '40px', borderLeft: '1px solid rgba(0,0,0,0.05)', background: '#fafbfc', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+                         <p style={{ fontSize: '11px', color: 'var(--gray)', fontWeight: '800', marginBottom: '5px', textTransform: 'uppercase' }}>Price per Night</p>
+                         <p className="serif" style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)', marginBottom: '10px' }}>{Number(room.base_price).toLocaleString()} <span style={{ fontSize: '12px' }}>VND</span></p>
+                         
+                         {room.totalPrice > 0 && (
+                           <div style={{ margin: '15px 0', padding: '10px', background: '#fff', borderRadius: '12px', border: '1px dashed var(--gold)' }}>
+                             <p style={{ fontSize: '11px', fontWeight: '700' }}>TOTAL ({room.nights} nights)</p>
+                             <p style={{ fontSize: '18px', fontWeight: '900', color: 'var(--black)' }}>{room.totalPrice.toLocaleString()} VND</p>
+                           </div>
+                         )}
+
+                         <Link to={`/rooms/${room.id}?checkIn=${checkIn}&checkOut=${checkOut}&adults=${adults}&children=${children}`} className="btn-gold" style={{ fontSize: '12px', width: '100%' }}>BOOK NOW</Link>
+                      </div>
+
+                    </div>
+                  ))}
+               </div>
+             )}
+          </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
+
+function FilterGroup({ title, options, selected, onToggle }) {
+  return (
+    <div style={{ marginBottom: '40px' }}>
+       <p style={{ fontSize: '13px', fontWeight: '800', color: 'var(--gold)', marginBottom: '20px', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</p>
+       {options.map(opt => (
+         <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+            <input 
+              type="checkbox" 
+              checked={selected.includes(opt.id.toString())}
+              onChange={() => onToggle(opt.id)}
+              style={{ width: '20px', height: '20px', accentColor: 'var(--gold)', cursor: 'pointer' }} 
+            />
+            <span style={{ fontSize: '15px', color: 'var(--black)', fontWeight: '600' }}>{opt.name}</span>
+         </div>
+       ))}
     </div>
   );
 }

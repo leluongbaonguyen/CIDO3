@@ -1,54 +1,151 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '../api/client';
 
 export default function AdminRoomTypesPage() {
-  const [types, setTypes] = useState([
-    { id: 1, name: 'Standard', basePrice: 500000, maxOccupancy: 2, description: 'Phòng tiêu chuẩn cơ bản' },
-    { id: 2, name: 'Superior', basePrice: 850000, maxOccupancy: 2, description: 'Phòng nâng cao view đẹp' },
-    { id: 3, name: 'Deluxe', basePrice: 1200000, maxOccupancy: 3, description: 'Phòng sang trọng rộng rãi' },
-    { id: 4, name: 'Suite', basePrice: 2500000, maxOccupancy: 4, description: 'Hạng phòng cao cấp nhất' },
-  ]);
+  const [types, setTypes] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingType, setEditingType] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    base_price: 0,
+    max_occupancy: 2,
+    photo_urls: ''
+  });
+
+  const load = async () => {
+    try {
+      const data = await api('/admin/room-types');
+      setTypes(data);
+    } catch (error) {
+      console.error('Lỗi tải dữ liệu:', error);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleOpenModal = (type = null) => {
+    if (type) {
+      setEditingType(type);
+      setFormData({
+        name: type.name,
+        description: type.description,
+        base_price: type.base_price,
+        max_occupancy: type.max_occupancy,
+        photo_urls: type.photo_urls || ''
+      });
+    } else {
+      setEditingType(null);
+      setFormData({
+        name: '',
+        description: '',
+        base_price: 0,
+        max_occupancy: 2,
+        photo_urls: ''
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingType) {
+        await api(`/admin/room-types/${editingType.id}`, { method: 'PUT', body: formData });
+      } else {
+        await api('/admin/room-types', { method: 'POST', body: formData });
+      }
+      setShowModal(false);
+      load();
+    } catch (error) {
+      alert('Lỗi lưu dữ liệu: ' + error.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa hạng phòng này?')) return;
+    try {
+      await api(`/admin/room-types/${id}`, { method: 'DELETE' });
+      load();
+    } catch (error) {
+      alert('Không thể xóa: ' + error.message);
+    }
+  };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+    <div style={{ animation: 'fadeInUp 0.6s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Quản lý loại phòng</h2>
-          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>Cấu hình giá cơ bản và sức chứa cho từng hạng phòng.</p>
+          <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-1px' }}>Hạng phòng niêm yết</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Cấu hình các phân khúc phòng nghỉ và giá niêm yết của resort.</p>
         </div>
-        <button style={{ backgroundColor: '#0ea5e9', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
-          <i className="fas fa-plus"></i> Thêm loại phòng
+        <button onClick={() => handleOpenModal()} className="btn-gold" style={{ padding: '12px 25px', fontSize: '13px' }}>
+          <i className="fas fa-plus" style={{ marginRight: '8px' }}></i> THÊM HẠNG PHÒNG
         </button>
       </div>
 
-      <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>Tên loại phòng</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>Giá cơ bản (VND)</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>Sức chứa tối đa</th>
-              <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>Mô tả</th>
-              <th style={{ padding: '16px 24px', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase' }}>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {types.map((t) => (
-              <tr key={t.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '16px 24px', fontWeight: '700', color: '#1e293b' }}>{t.name}</td>
-                <td style={{ padding: '16px 24px', color: '#0ea5e9', fontWeight: '600' }}>{t.basePrice.toLocaleString()} ₫</td>
-                <td style={{ padding: '16px 24px', color: '#64748b' }}>{t.maxOccupancy} người</td>
-                <td style={{ padding: '16px 24px', color: '#64748b', fontSize: '13px' }}>{t.description}</td>
-                <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                    <button style={{ border: 'none', background: 'transparent', color: '#0ea5e9', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
-                    <button style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer' }}><i className="fas fa-trash-alt"></i></button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '30px' }}>
+        {types.map((type) => (
+          <div key={type.id} className="card-luxury-premium" style={{ display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: '24px', overflow: 'hidden', boxShadow: 'var(--shadow-premium)', border: '1px solid #f1f5f9' }}>
+            <div style={{ height: '200px', position: 'relative' }}>
+               <img src={type.photo_urls?.split(',')[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={type.name} />
+               <div style={{ position: 'absolute', bottom: '20px', left: '20px', padding: '6px 15px', background: 'var(--gold-gradient)', color: 'var(--black)', borderRadius: '50px', fontSize: '11px', fontWeight: '800' }}>
+                  {Number(type.base_price).toLocaleString()}đ / ĐÊM
+               </div>
+            </div>
+            <div style={{ padding: '24px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary)' }}>{type.name}</h3>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                     <button onClick={() => handleOpenModal(type)} style={{ background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '10px', color: 'var(--primary)', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
+                     <button onClick={() => handleDelete(type.id)} style={{ background: '#fee2e2', border: 'none', width: '36px', height: '36px', borderRadius: '10px', color: '#ef4444', cursor: 'pointer' }}><i className="fas fa-trash"></i></button>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+               </div>
+               <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '20px', height: '45px', overflow: 'hidden' }}>{type.description}</p>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '13px', fontWeight: '700', color: 'var(--primary)' }}>
+                  <div><i className="fas fa-user-friends" style={{ marginRight: '8px', color: 'var(--gold)' }}></i> Tối đa {type.max_occupancy} khách</div>
+                  <div><i className="fas fa-images" style={{ marginRight: '8px', color: 'var(--gold)' }}></i> {type.photo_urls?.split(',').length || 0} ảnh</div>
+               </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', width: '600px', borderRadius: '24px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary)', marginBottom: '32px' }}>{editingType ? 'Cập nhật hạng phòng' : 'Thêm hạng phòng mới'}</h3>
+            <div style={{ display: 'grid', gap: '20px' }}>
+                <div>
+                   <label className="luxury-label">Tên hạng phòng</label>
+                   <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                   <div>
+                      <label className="luxury-label">Giá niêm yết (VNĐ)</label>
+                      <input required type="number" value={formData.base_price} onChange={e => setFormData({...formData, base_price: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                   </div>
+                   <div>
+                      <label className="luxury-label">Số khách tối đa</label>
+                      <input required type="number" value={formData.max_occupancy} onChange={e => setFormData({...formData, max_occupancy: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                   </div>
+                </div>
+                <div>
+                   <label className="luxury-label">Mô tả chi tiết</label>
+                   <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', height: '100px', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', resize: 'none' }} />
+                </div>
+                <div>
+                   <label className="luxury-label">URL Hình ảnh (phân cách bằng dấu phẩy)</label>
+                   <input value={formData.photo_urls} onChange={e => setFormData({...formData, photo_urls: e.target.value})} placeholder="https://image1.jpg,https://image2.jpg" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '40px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '12px 25px', borderRadius: '10px', border: 'none', background: '#f1f5f9', fontWeight: '700', cursor: 'pointer' }}>HỦY BỎ</button>
+              <button type="submit" className="btn-accent" style={{ padding: '12px 35px' }}>XÁC NHẬN LƯU</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

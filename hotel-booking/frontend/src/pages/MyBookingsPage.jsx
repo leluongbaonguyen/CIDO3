@@ -25,149 +25,141 @@ export default function MyBookingsPage() {
     if (!user) {
       navigate('/login');
     } else {
+      window.scrollTo(0, 0);
       loadBookings();
     }
   }, [user, navigate]);
 
-  const pay = async (id) => {
-    try {
-      await api(`/bookings/${id}/pay`, {
-        method: 'POST',
-        body: JSON.stringify({ paymentMethod: 'VNPAY' })
-      });
-      setMessage('Thanh toán thành công! Đơn đặt phòng đã được cập nhật.');
-      loadBookings();
-    } catch (err) {
-      setMessage('Thanh toán thất bại.');
-    }
-  };
-
   const cancel = async (id, checkinDate) => {
     const checkin = new Date(checkinDate);
     const now = new Date();
-    const diffTime = checkin - now;
-    const diffHours = diffTime / (1000 * 60 * 60);
-
-    if (diffHours < 24) {
-      alert('Chính sách: Khách hàng không thể hủy phòng trong vòng 24 giờ trước thời gian check-in.');
+    if ((checkin - now) / (1000 * 60 * 60) < 24) {
+      alert('Chính sách: Không thể hủy trong vòng 24 giờ trước nhận phòng.');
       return;
     }
-
-    if (window.confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng này?')) {
+    if (window.confirm('Bạn có chắc chắn muốn hủy đơn này?')) {
       try {
         await api(`/bookings/${id}/cancel`, { method: 'PATCH' });
-        setMessage('Đã hủy đơn đặt phòng.');
         loadBookings();
+        alert('Đã hủy đơn thành công.');
       } catch (err) {
-        setMessage('Hủy phòng thất bại: ' + err.message);
+        alert('Lỗi: ' + err.message);
       }
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '40px' }}>Đang tải dữ liệu...</div>;
+  if (loading) return (
+    <div style={{ padding: '150px', textAlign: 'center' }}>
+       <i className="fas fa-circle-notch fa-spin" style={{ fontSize: '40px', color: 'var(--gold)' }}></i>
+    </div>
+  );
 
   return (
-    <div className="admin-layout" style={{ marginTop: '40px' }}>
-
-      <div className="sidebar card">
-        <h3 style={{ padding: '0 16px', marginBottom: '8px', color: 'var(--primary)' }}>
-          Xin chào, {user?.last_name || 'Khách hàng'}
-        </h3>
-        <p style={{ padding: '0 16px', color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px' }}>
-          Tài khoản cá nhân
-        </p>
-
-        <Link to="/profile">
-          <span style={{ marginRight: '8px' }}>👤</span> Thông tin cá nhân
-        </Link>
-        <Link to="/my-bookings" className="active">
-          <span style={{ marginRight: '8px' }}>📅</span> Đơn đặt phòng
-        </Link>
-        <a href="#!" onClick={(e) => { e.preventDefault(); }}>
-          <span style={{ marginRight: '8px' }}>⭐</span> Đánh giá của tôi
-        </a>
-      </div>
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <h2 style={{ color: 'var(--text-dark)' }}>Quản lý Đơn đặt phòng</h2>
-
-        {message && (
-          <div className={message.includes('thất bại') ? "error" : "success"} style={{ padding: '12px', background: message.includes('thất bại') ? 'rgba(210,18,46,0.1)' : 'rgba(3,162,83,0.1)', borderRadius: '8px', color: message.includes('thất bại') ? 'var(--danger)' : 'var(--success)' }}>
-            {message}
-          </div>
-        )}
-
-        {bookings.length === 0 ? (
-          <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🏨</div>
-            <h3 style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>Hiện tại chưa có đơn đặt phòng nào</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Hãy bắt đầu chuyến đi tuyệt vời của bạn ngay hôm nay.</p>
-            <Link to="/rooms" className="btn">Tìm phòng ngay</Link>
-          </div>
-        ) : (
-          bookings.map((item) => (
-            <div className="card" key={item.id} style={{ padding: '24px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 300px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ color: 'var(--primary)', margin: 0 }}>Mã Đơn: #{item.id}</h3>
-                  {item.status === 'PENDING' && <span className="badge badge-orange">Chờ thanh toán</span>}
-                  {item.status === 'CONFIRMED' && <span className="badge badge-blue">Đã thanh toán</span>}
-                  {item.status === 'COMPLETED' && <span className="badge badge-green">Hoàn tất</span>}
-                  {item.status === 'CANCELLED' && <span className="badge" style={{ background: '#f8d7da', color: '#721c24' }}>Đã hủy</span>}
+    <div style={{ background: '#f8fafc', minHeight: '100vh', paddingTop: '120px', paddingBottom: '80px' }}>
+      <div className="container">
+        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '40px' }}>
+          
+          {/* USER SIDEBAR */}
+          <aside style={{ height: 'fit-content' }}>
+             <div className="card-luxury" style={{ padding: '40px 30px', textAlign: 'center' }}>
+                <div style={{ 
+                   width: '80px', height: '80px', borderRadius: '50%', background: 'var(--gold)', 
+                   margin: '0 auto 20px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                   fontSize: '32px', color: '#fff', fontWeight: '800', boxShadow: '0 10px 20px rgba(196,166,97,0.3)'
+                }}>
+                   {user?.first_name?.[0] || 'U'}
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{ padding: '12px', background: 'var(--bg-main)', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Phòng</div>
-                    <div style={{ fontWeight: '600' }}>{item.room_type_name || 'Phòng khách sạn'}</div>
-                    <div style={{ fontSize: '13px' }}>Phòng số {item.room_number || 'Sẽ cấp sau'}</div>
-                  </div>
-                  <div style={{ padding: '12px', background: 'var(--bg-main)', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Khách</div>
-                    <div style={{ fontWeight: '600' }}>{item.total_guests} Khách</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--border-light)' }}>
-                  <div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Nhận phòng:</div>
-                    <div style={{ fontWeight: '500' }}>{new Date(item.checkin_date).toLocaleDateString('vi-VN')}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Trả phòng:</div>
-                    <div style={{ fontWeight: '500' }}>{new Date(item.checkout_date).toLocaleDateString('vi-VN')}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ width: '250px', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '24px', borderLeft: '1px solid var(--border-light)' }}>
-                <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>Tổng thanh toán</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--secondary)', marginBottom: '20px' }}>
-                  {Number(item.total_amount).toLocaleString('vi-VN')} đ
-                </div>
-
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary)', marginBottom: '5px' }}>{user?.first_name} {user?.last_name}</h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '30px' }}>{user?.email}</p>
+                
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {item.status === 'PENDING' && (
-                    <button className="btn" onClick={() => pay(item.id)} style={{ width: '100%', background: 'var(--secondary)', borderColor: 'var(--secondary)' }}>
-                      Thanh toán VNPay
-                    </button>
-                  )}
-                  {['PENDING', 'CONFIRMED'].includes(item.status) && (
-                    <button className="btn outline" onClick={() => cancel(item.id, item.checkin_date)} style={{ width: '100%', color: 'var(--danger)', borderColor: 'var(--danger)' }}>
-                      Hủy đặt phòng
-                    </button>
-                  )}
-                  {item.status === 'COMPLETED' && (
-                    <button className="btn outline" style={{ width: '100%' }}>
-                      Đánh giá dịch vụ
-                    </button>
-                  )}
+                   <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-muted)', fontWeight: '600', transition: '0.3s' }}>
+                      <i className="far fa-user-circle"></i> Thông tin cá nhân
+                   </Link>
+                   <Link to="/my-bookings" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', borderRadius: '12px', textDecoration: 'none', color: '#fff', background: 'var(--primary)', fontWeight: '700', boxShadow: '0 10px 20px rgba(15,23,42,0.1)' }}>
+                      <i className="fas fa-calendar-check"></i> Đơn đặt phòng
+                   </Link>
+                   <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 20px', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-muted)', fontWeight: '600' }}>
+                      <i className="far fa-star"></i> Đánh giá của tôi
+                   </Link>
                 </div>
-              </div>
-            </div>
-          ))
-        )}
+             </div>
+          </aside>
+
+          {/* MAIN CONTENT */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+             <div>
+                <h2 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--primary)', marginBottom: '10px' }}>Chuyến đi của bạn</h2>
+                <p style={{ color: 'var(--text-muted)' }}>Xem và quản lý các lịch trình nghỉ dưỡng tại XTRAVEL.</p>
+             </div>
+
+             {bookings.length === 0 ? (
+                <div className="card-luxury" style={{ padding: '80px', textAlign: 'center' }}>
+                   <div style={{ fontSize: '60px', color: 'var(--gold)', marginBottom: '20px', opacity: 0.3 }}>
+                      <i className="fas fa-hotel"></i>
+                   </div>
+                   <h3 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary)', marginBottom: '15px' }}>Chưa có đơn đặt phòng nào</h3>
+                   <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Hãy chọn một không gian nghỉ dưỡng tuyệt vời cho chuyến đi sắp tới.</p>
+                   <Link to="/rooms" className="btn-gold" style={{ padding: '15px 40px', display: 'inline-block' }}>Khám phá phòng ngay</Link>
+                </div>
+             ) : (
+                bookings.map(item => (
+                   <div key={item.id} className="card-luxury" style={{ display: 'grid', gridTemplateColumns: '250px 1fr 200px', padding: '0', overflow: 'hidden' }}>
+                      <div style={{ background: `url(${JSON.parse(item.photo_urls || '[""]')[0]}) center/cover`, minHeight: '200px' }}></div>
+                      <div style={{ padding: '30px' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '2px' }}>Mã đơn #{item.id}</span>
+                            <StatusBadge status={item.status} />
+                         </div>
+                         <h3 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--primary)', marginBottom: '15px' }}>{item.room_type_name}</h3>
+                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <InfoItem icon="fa-calendar-alt" label="Nhận phòng" value={new Date(item.checkin_date).toLocaleDateString('vi-VN')} />
+                            <InfoItem icon="fa-moon" label="Trả phòng" value={new Date(item.checkout_date).toLocaleDateString('vi-VN')} />
+                         </div>
+                      </div>
+                      <div style={{ padding: '30px', borderLeft: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', background: '#fafafa' }}>
+                         <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '5px' }}>Tổng thanh toán</span>
+                         <div style={{ fontSize: '24px', fontWeight: '900', color: 'var(--primary)', marginBottom: '20px' }}>{Number(item.total_amount).toLocaleString()}đ</div>
+                         
+                         {['PENDING', 'CONFIRMED'].includes(item.status) && (
+                            <button onClick={() => cancel(item.id, item.checkin_date)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #fee2e2', color: '#ef4444', background: '#fff', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.background = '#fee2e2'}>Hủy đơn</button>
+                         )}
+                         {item.status === 'COMPLETED' && (
+                            <button className="btn-gold" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', fontSize: '13px' }}>Viết đánh giá</button>
+                         )}
+                      </div>
+                   </div>
+                ))
+             )}
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function StatusBadge({ status }) {
+    let config = { label: status, color: '#64748b', bg: '#f1f5f9' };
+    if (status === 'PENDING') config = { label: 'CHỜ DUYỆT', color: '#f59e0b', bg: '#fef3c7' };
+    if (status === 'CONFIRMED') config = { label: 'ĐÃ XÁC NHẬN', color: '#0ea5e9', bg: '#e0f2fe' };
+    if (status === 'COMPLETED') config = { label: 'HOÀN TẤT', color: '#10b981', bg: '#dcfce7' };
+    if (status === 'CANCELLED') config = { label: 'ĐÃ HỦY', color: '#ef4444', bg: '#fee2e2' };
+
+    return (
+        <span style={{ fontSize: '10px', fontWeight: '800', color: config.color, background: config.bg, padding: '4px 12px', borderRadius: '50px', letterSpacing: '1px' }}>{config.label}</span>
+    );
+}
+
+function InfoItem({ icon, label, value }) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--gold)', fontSize: '12px' }}>
+                <i className={`fas ${icon}`}></i>
+            </div>
+            <div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>{label}</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--primary)' }}>{value}</div>
+            </div>
+        </div>
+    );
 }

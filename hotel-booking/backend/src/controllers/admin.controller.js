@@ -18,12 +18,23 @@ export const getDashboardStats = async (req, res, next) => {
       LIMIT 6
     `);
 
+    const totalRevenue = Number(revenue[0].total || 0);
+    const totalBookings = Number(bookings[0].total || 0);
+    const totalRooms = Number(rooms[0].total || 0);
+    const totalRoomsAvailable = Number(rooms[0].available || 0);
+    const occupancyRate = rooms[0].total > 0 ? Math.round(((Number(rooms[0].total) - Number(rooms[0].available)) / Number(rooms[0].total)) * 100) : 0;
+    const totalCustomers = Number(customers[0].total || 0);
+
+    console.log('Dashboard Stats Query Result:', { totalRevenue, totalBookings, totalRooms, totalCustomers });
+
     res.json({
-      totalRevenue: revenue[0].total || 0,
-      totalBookings: bookings[0].total || 0,
-      occupancyRate: rooms[0].total > 0 ? Math.round(((rooms[0].total - rooms[0].available) / rooms[0].total) * 100) : 0,
-      totalCustomers: customers[0].total || 0,
-      monthlyRevenue: monthlyRevenue.reverse()
+      totalRevenue: totalRevenue,
+      totalBookings: totalBookings,
+      totalRooms: totalRooms,
+      totalRoomsAvailable: totalRoomsAvailable,
+      occupancyRate: occupancyRate,
+      totalCustomers: totalCustomers,
+      monthlyRevenue: monthlyRevenue.reverse().map(item => ({ ...item, total: Number(item.total) }))
     });
   } catch (error) {
     next(error);
@@ -42,7 +53,7 @@ export const listAllBookings = async (req, res, next) => {
       LEFT JOIN booking_items bi ON bi.booking_id = b.id
       LEFT JOIN rooms r ON r.id = bi.room_id
       LEFT JOIN room_types rt ON rt.id = r.room_type_id
-      ORDER BY b.created_at DESC
+      ORDER BY b.create_date DESC
     `);
     res.json(rows);
   } catch (error) {
@@ -50,21 +61,52 @@ export const listAllBookings = async (req, res, next) => {
   }
 };
 
+export const createBooking = async (req, res, next) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const { customer_id, room_id, checkin_date, checkout_date, total_guests, status, payment_method } = req.body;
+        
+        const start = new Date(checkin_date);
+        const end = new Date(checkout_date);
+        const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+        const [room] = await pool.query("SELECT rt.base_price FROM rooms r JOIN room_types rt ON rt.id = r.room_type_id WHERE r.id = ?", [room_id]);
+        const total_amount = room[0].base_price * nights;
+
+        const [booking] = await connection.query(
+            "INSERT INTO bookings (customer_id, checkin_date, checkout_date, total_amount, status, booking_date, total_guests) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [customer_id, checkin_date, checkout_date, total_amount, status || 'CONFIRMED', new Date(), total_guests]
+        );
+
+        await connection.query(
+            "INSERT INTO booking_items (booking_id, room_id, price, quantity) VALUES (?, ?, ?, ?)",
+            [booking.insertId, room_id, room[0].base_price, 1]
+        );
+
+        if (status === 'CONFIRMED' || status === 'COMPLETED') {
+            await connection.query("UPDATE rooms SET status = 'OCCUPIED' WHERE id = ?", [room_id]);
+        }
+
+        await connection.commit();
+        res.status(201).json({ message: 'Booking created successfully', bookingId: booking.insertId });
+    } catch (error) {
+        await connection.rollback();
+        next(error);
+    } finally {
+        connection.release();
+    }
+};
+
 export const updateBookingStatus = async (req, res, next) => {
   try {
     const { bookingId } = req.params;
-    const { status } = req.body; // PENDING, CONFIRMED, CANCELLED, COMPLETED
-    
+    const { status } = req.body;
     await pool.query('UPDATE bookings SET status = ? WHERE id = ?', [status, bookingId]);
-    
-    // Nếu hoàn tất, trả phòng về trạng thái AVAILABLE
     if (status === 'COMPLETED') {
         const [items] = await pool.query('SELECT room_id FROM booking_items WHERE booking_id = ?', [bookingId]);
-        if (items.length > 0) {
-            await pool.query('UPDATE rooms SET status = "AVAILABLE" WHERE id = ?', [items[0].room_id]);
-        }
+        if (items.length > 0) await pool.query('UPDATE rooms SET status = "AVAILABLE" WHERE id = ?', [items[0].room_id]);
     }
-    
     res.json({ message: `Booking status updated to ${status}` });
   } catch (error) {
     next(error);
@@ -148,7 +190,7 @@ export const listCustomers = async (req, res, next) => {
 export const listEmployees = async (req, res, next) => {
   try {
     const [rows] = await pool.query(`
-      SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.status,
+      SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.status, u.phone,
              e.position, e.department, e.hire_date
       FROM users u
       JOIN employees e ON e.user_id = u.id
@@ -158,6 +200,41 @@ export const listEmployees = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const createEmployee = async (req, res, next) => {
+    try {
+        const { email, first_name, last_name, phone, role, password, position, department } = req.body;
+        const [user] = await pool.query(
+            "INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)",
+            [email, password, first_name, last_name, phone, role]
+        );
+        await pool.query(
+            "INSERT INTO employees (user_id, position, department) VALUES (?, ?, ?)",
+            [user.insertId, position, department]
+        );
+        res.status(201).json({ message: 'Employee created' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateEmployee = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { first_name, last_name, phone, role, position, department, status } = req.body;
+        await pool.query(
+            "UPDATE users SET first_name = ?, last_name = ?, phone = ?, role = ?, status = ? WHERE id = ?",
+            [first_name, last_name, phone, role, status, id]
+        );
+        await pool.query(
+            "UPDATE employees SET position = ?, department = ? WHERE user_id = ?",
+            [position, department, id]
+        );
+        res.json({ message: 'Employee updated' });
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const listRoles = async (req, res, next) => {
@@ -189,6 +266,43 @@ export const listRoomTypes = async (req, res, next) => {
   }
 };
 
+export const createRoomType = async (req, res, next) => {
+    try {
+        const { name, description, base_price, max_occupancy, photo_urls } = req.body;
+        await pool.query(
+            "INSERT INTO room_types (name, description, base_price, max_occupancy, photo_urls) VALUES (?, ?, ?, ?, ?)",
+            [name, description, base_price, max_occupancy, photo_urls]
+        );
+        res.status(201).json({ message: 'Room type created' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateRoomType = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, description, base_price, max_occupancy, photo_urls } = req.body;
+        await pool.query(
+            "UPDATE room_types SET name = ?, description = ?, base_price = ?, max_occupancy = ?, photo_urls = ? WHERE id = ?",
+            [name, description, base_price, max_occupancy, photo_urls, id]
+        );
+        res.json({ message: 'Room type updated' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteRoomType = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await pool.query("DELETE FROM room_types WHERE id = ?", [id]);
+        res.json({ message: 'Room type deleted' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const listAmenities = async (req, res, next) => {
   try {
     const [rows] = await pool.query("SELECT * FROM amenities");
@@ -196,6 +310,37 @@ export const listAmenities = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const createAmenity = async (req, res, next) => {
+    try {
+        const { name, description, icon } = req.body;
+        await pool.query("INSERT INTO amenities (name, description, icon) VALUES (?, ?, ?)", [name, description, icon]);
+        res.status(201).json({ message: 'Amenity created' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateAmenity = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, description, icon } = req.body;
+        await pool.query("UPDATE amenities SET name = ?, description = ?, icon = ? WHERE id = ?", [name, description, icon, id]);
+        res.json({ message: 'Amenity updated' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteAmenity = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await pool.query("DELETE FROM amenities WHERE id = ?", [id]);
+        res.json({ message: 'Amenity deleted' });
+    } catch (error) {
+        next(error);
+    }
 };
 
 // --- QUẢN LÝ ĐÁNH GIÁ (REVIEWS) ---
@@ -231,12 +376,184 @@ export const deleteReview = async (req, res, next) => {
 // --- HỖ TRỢ KHÁCH HÀNG (SUPPORT) ---
 export const listSupport = async (req, res, next) => {
   try {
-    // Trong thực tế sẽ có bảng support_tickets, tạm thời trả về mock data chi tiết
-    res.json([
-      { id: 1, customerName: 'Lê Bảo Nguyên', email: 'nguyen@gmail.com', subject: 'Lỗi thanh toán VNPay', message: 'Tôi đã thanh toán nhưng hệ thống chưa cập nhật', status: 'OPEN', date: '2026-04-30' },
-      { id: 2, customerName: 'Trần Huy', email: 'huy@gmail.com', subject: 'Yêu cầu thêm tiện ích', message: 'Tôi muốn đặt thêm dịch vụ Spa', status: 'CLOSED', date: '2026-04-29' }
-    ]);
+    const [rows] = await pool.query("SELECT * FROM support_tickets ORDER BY create_date DESC");
+    res.json(rows);
   } catch (error) {
     next(error);
   }
+};
+
+export const seedData = async (req, res, next) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        console.log('🚀 Bắt đầu nạp dữ liệu chuẩn XTRAVEL...');
+
+        // 1. Dọn dẹp dữ liệu cũ
+        await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+        const tables = ['audit_logs', 'reviews', 'payments', 'booking_items', 'bookings', 'rooms', 'room_type_amenities', 'amenities', 'room_types', 'employees', 'customers', 'users'];
+        for (const table of tables) await connection.query(`TRUNCATE TABLE ${table}`);
+        await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+
+        // 2. Tạo tài khoản mẫu (Password: password123)
+        const hashedPw = '$2a$10$X8O7k6uY9fR7/qW3H2G5ueX8p.qBfXvYy.RzE6O1k8P9Q4W3G2H2'; 
+        
+        // Admin
+        const [adminRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['admin@xtravel.com', hashedPw, 'Bảo Nguyên', 'Lê', 'ADMIN', 'ACTIVE']);
+        await connection.query("INSERT INTO employees (user_id, position, department) VALUES (?, ?, ?)", [adminRes.insertId, 'Tổng quản lý', 'Hội đồng quản trị']);
+
+        // Staff
+        const [staffRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['staff@xtravel.com', hashedPw, 'Thị Tuyết', 'Nguyễn', 'EMPLOYEE', 'ACTIVE']);
+        await connection.query("INSERT INTO employees (user_id, position, department) VALUES (?, ?, ?)", [staffRes.insertId, 'Lễ tân trưởng', 'Tiền sảnh']);
+
+        // Customer
+        const [cusRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status, phone) VALUES (?, ?, ?, ?, ?, ?, ?)", ['customer@gmail.com', hashedPw, 'Thành Công', 'Trần', 'CUSTOMER', 'ACTIVE', '0905123456']);
+        await connection.query("INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)", [cusRes.insertId, 'Hải Châu, Đà Nẵng', 'Đà Nẵng', 'Vietnam', 'ID999999']);
+
+        // 3. Tạo Tiện nghi (Amenities)
+        const amenityList = [
+            ['Wifi miễn phí', 'fa-wifi'], ['Bể bơi vô cực', 'fa-swimming-pool'], ['Bữa sáng buffet', 'fa-utensils'],
+            ['Phòng Gym', 'fa-dumbbell'], ['Dịch vụ Spa', 'fa-spa'], ['Mini Bar', 'fa-cocktail'],
+            ['Điều hòa', 'fa-snowflake'], ['Tivi 4K', 'fa-tv'], ['Bồn tắm', 'fa-bath']
+        ];
+        const amenityIds = [];
+        for (const [name, icon] of amenityList) {
+            const [res] = await connection.query("INSERT INTO amenities (name, icon) VALUES (?, ?)", [name, icon]);
+            amenityIds.push(res.insertId);
+        }
+
+        // 4. Tạo Loại phòng (Room Types)
+        const types = [
+            { 
+                name: 'Standard Heritage', 
+                price: 800000, 
+                max: 2, 
+                desc: 'Phòng tiêu chuẩn với thiết kế cổ điển, đầy đủ tiện nghi cho khách du lịch cá nhân.',
+                imgs: ['https://images.unsplash.com/photo-1596394516093-501ba68a0ba6', 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511']
+            },
+            { 
+                name: 'Deluxe Ocean View', 
+                price: 1800000, 
+                max: 2, 
+                desc: 'Tầm nhìn panorama hướng biển, không gian sang trọng và lãng mạn.',
+                imgs: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b']
+            },
+            { 
+                name: 'Executive Family Suite', 
+                price: 3500000, 
+                max: 4, 
+                desc: 'Căn hộ thu nhỏ với 2 phòng ngủ, lý tưởng cho gia đình nghỉ dưỡng.',
+                imgs: ['https://images.unsplash.com/photo-1590490360182-c33d57733427', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461']
+            },
+            { 
+                name: 'Penthouse Presidential', 
+                price: 12000000, 
+                max: 6, 
+                desc: 'Đỉnh cao của sự xa hoa tại tầng thượng với hồ bơi riêng và quản gia 24/7.',
+                imgs: ['https://images.unsplash.com/photo-1542314831-068cd1dbfeeb', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d']
+            }
+        ];
+
+        for (let i = 0; i < types.length; i++) {
+            const t = types[i];
+            const [rtRes] = await connection.query(
+                "INSERT INTO room_types (name, description, base_price, max_occupancy, photo_urls) VALUES (?, ?, ?, ?, ?)", 
+                [t.name, t.desc, t.price, t.max, t.imgs.join(',')]
+            );
+            
+            // Gán tiện nghi ngẫu nhiên
+            for (let j = 0; j < 5; j++) {
+                const aId = amenityIds[Math.floor(Math.random() * amenityIds.length)];
+                await connection.query("INSERT IGNORE INTO room_type_amenities (room_type_id, amenity_id) VALUES (?, ?)", [rtRes.insertId, aId]);
+            }
+
+            // 5. Tạo 100 Phòng (mỗi loại 25 phòng)
+            for (let r = 1; r <= 25; r++) {
+                const floor = i + 1;
+                const roomNum = `${floor}${String(r).padStart(2, '0')}`;
+                await connection.query("INSERT INTO rooms (room_number, floor, status, room_type_id) VALUES (?, ?, ?, ?)", [roomNum, floor, 'AVAILABLE', rtRes.insertId]);
+            }
+        }
+
+        // 6. Tạo 20 Khách hàng mẫu
+        const customersData = [
+            ['Minh', 'Hoàng', 'hoangminh@gmail.com', '0905123456', 'Hải Châu, Đà Nẵng'],
+            ['Thanh', 'Hương', 'huongthanh@gmail.com', '0914223344', 'Sơn Trà, Đà Nẵng'],
+            ['Tuấn', 'Anh', 'anh_tuan@yahoo.com', '0988556677', 'Hoàn Kiếm, Hà Nội'],
+            ['Ngọc', 'Lan', 'lanngoc@gmail.com', '0935112233', 'Quận 1, TP.HCM'],
+            ['Quốc', 'Bảo', 'baoquoc@gmail.com', '0901223344', 'Thanh Khê, Đà Nẵng'],
+            ['Thị', 'Mai', 'mai_thi@gmail.com', '0912334455', 'Hòa Vang, Đà Nẵng'],
+            ['Duy', 'Mạnh', 'manhduy@gmail.com', '0987654321', 'Ba Đình, Hà Nội'],
+            ['Khánh', 'Linh', 'linhkhanh@gmail.com', '0905998877', 'Ngũ Hành Sơn, Đà Nẵng'],
+            ['Minh', 'Trí', 'triminh@gmail.com', '0932112233', 'Quận 3, TP.HCM'],
+            ['Phương', 'Thảo', 'thaophuong@gmail.com', '0911223344', 'Cẩm Lệ, Đà Nẵng']
+        ];
+        const customerIds = [cusRes.insertId];
+        for (const [fname, lname, email, phone, addr] of customersData) {
+            const [u] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status, phone) VALUES (?, ?, ?, ?, ?, ?, ?)", [email, hashedPw, fname, lname, 'CUSTOMER', 'ACTIVE', phone]);
+            const [c] = await connection.query("INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)", [u.insertId, addr, 'Đà Nẵng', 'Vietnam', `ID-${Date.now()}-${Math.random()}`]);
+            customerIds.push(c.insertId);
+        }
+
+        // 7. Tạo 60 Đơn đặt phòng (Bookings) mẫu trong 6 tháng qua
+        const statuses = ['COMPLETED', 'CONFIRMED', 'PENDING', 'CANCELLED'];
+        const roomsRes = await connection.query("SELECT id, room_type_id FROM rooms");
+        const allRooms = roomsRes[0];
+
+        for (let i = 0; i < 60; i++) {
+            const cId = customerIds[Math.floor(Math.random() * customerIds.length)];
+            const room = allRooms[Math.floor(Math.random() * allRooms.length)];
+            const rt = types.find(t => t.name === (i % 4 === 0 ? 'Standard Heritage' : (i % 4 === 1 ? 'Deluxe Ocean View' : (i % 4 === 2 ? 'Executive Family Suite' : 'Penthouse Presidential'))));
+            
+            // Random ngày trong khoảng 180 ngày qua đến 30 ngày tới
+            const dateOffset = Math.floor(Math.random() * 210) - 180;
+            const checkin = new Date();
+            checkin.setDate(checkin.getDate() + dateOffset);
+            const checkout = new Date(checkin);
+            checkout.setDate(checkout.getDate() + Math.floor(Math.random() * 5) + 1);
+
+            const status = dateOffset < 0 ? 'COMPLETED' : statuses[Math.floor(Math.random() * 3)];
+            const total = (rt?.price || 1000000) * Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+            const guests = Math.floor(Math.random() * (rt?.max || 2)) + 1;
+
+            const [bRes] = await connection.query(
+                "INSERT INTO bookings (customer_id, checkin_date, checkout_date, total_amount, status, create_date, booking_date, total_guests) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [cId, checkin, checkout, total, status, checkin, checkin, guests]
+            );
+
+            await connection.query("INSERT INTO booking_items (booking_id, room_id, price, quantity) VALUES (?, ?, ?, ?)", [bRes.insertId, room.id, rt?.price || 1000000, 1]);
+
+            if (status === 'COMPLETED') {
+                await connection.query("INSERT INTO payments (booking_id, amount, payment_method, status, payment_date, transaction_id) VALUES (?, ?, ?, ?, ?, ?)", 
+                    [bRes.insertId, total, 'VNPAY', 'SUCCESS', checkin, `TXN-${Date.now()}-${i}`]);
+                
+                // Thêm đánh giá ngẫu nhiên
+                if (Math.random() > 0.5) {
+                    const comments = [
+                        'Dịch vụ tuyệt vời, phòng sạch sẽ và view rất đẹp!',
+                        'Nhân viên thân thiện, đồ ăn sáng ngon.',
+                        'Kỳ nghỉ đáng nhớ, tôi sẽ quay lại.',
+                        'Phòng hơi ồn một chút nhưng bù lại vị trí rất tốt.',
+                        'Đẳng cấp 5 sao thực sự, penthouse quá xịn!'
+                    ];
+                    await connection.query(
+                        "INSERT INTO reviews (booking_id, customer_id, rating, comment, review_date) VALUES (?, ?, ?, ?, ?)",
+                        [bRes.insertId, cId, Math.floor(Math.random() * 2) + 4, comments[Math.floor(Math.random() * comments.length)], checkin]
+                    );
+                }
+            }
+        }
+
+        await connection.commit();
+        res.json({ 
+            message: 'Đã nạp 100 phòng, 20 khách hàng và 60 đơn đặt phòng thành công!',
+            stats: 'Hệ thống đã sẵn sàng cho demo với dữ liệu thực tế 6 tháng qua.'
+        });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Seed error:', error);
+        next(error);
+    } finally {
+        connection.release();
+    }
 };

@@ -1,38 +1,43 @@
+import React from 'react';
+
 export default function BlogPage() {
   const blogs = [
-    { id: 1, title: 'Top 10 địa điểm không thể bỏ qua tại Đà Nẵng', date: '20/04/2026', author: 'Lê Nguyên', image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&q=80', excerpt: 'Khám phá những bãi biển tuyệt đẹp và những cây cầu biểu tượng của thành phố đáng sống nhất Việt Nam...' },
-    { id: 2, title: 'Bí quyết tận hưởng kỳ nghỉ trọn vẹn tại XTRAVEL', date: '15/04/2026', author: 'Trần Huy', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80', excerpt: 'Từ cách đặt phòng đến việc trải nghiệm các dịch vụ spa cao cấp, hãy cùng chúng tôi khám phá...' },
-    { id: 3, title: 'Ẩm thực tinh hoa tại nhà hàng XTRAVEL Kitchen', date: '10/04/2026', author: 'Phan Hiền', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80', excerpt: 'Hành trình vị giác với những món ăn kết hợp hoàn hảo giữa truyền thống và hiện đại...' },
+    { id: 1, title: 'Top 5 hoạt động không thể bỏ qua khi nghỉ dưỡng tại XTRAVEL', date: '20 Th04, 2026', img: 'https://images.pexels.com/photos/1105191/pexels-photo-1105191.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { id: 2, title: 'Cẩm nang thưởng thức ẩm thực tinh túy tại nhà hàng Blue Ocean', date: '15 Th04, 2026', img: 'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?auto=compress&cs=tinysrgb&w=800' },
+    { id: 3, title: 'Bí quyết đặt phòng giá tốt nhất mùa cao điểm', date: '10 Th04, 2026', img: 'https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=800' }
   ];
 
   return (
-    <div style={{ animation: 'fadeIn 0.8s ease-out', padding: '60px 0' }}>
-      <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h1 style={{ fontSize: '40px', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '16px' }}>Bài viết & Tin tức</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Cập nhật những thông tin mới nhất về du lịch và ưu đãi tại XTRAVEL.</p>
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', padding: '100px 0' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        
+        {/* FEATURED POST - CẦU RỒNG ĐÀ NẴNG */}
+        <div className="animate-up" style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: '500px', marginBottom: '80px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
+           <img src="https://images.pexels.com/photos/1010651/pexels-photo-1010651.jpeg?auto=compress&cs=tinysrgb&w=1600" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Da Nang" />
+           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.8))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '60px' }}>
+              <span style={{ background: '#ff5a3d', color: '#fff', padding: '8px 20px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', width: 'fit-content', marginBottom: '20px' }}>KHÁM PHÁ</span>
+              <h2 style={{ fontSize: '42px', color: '#fff', fontWeight: '800', maxWidth: '800px', lineHeight: '1.2' }}>Hành trình khám phá vẻ đẹp kỳ ảo của Đà Nẵng từ tầm nhìn của XTRAVEL</h2>
+           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
-          {blogs.map(blog => (
-            <article key={blog.id} style={{ backgroundColor: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-              <div style={{ height: '220px', overflow: 'hidden' }}>
-                <img src={blog.image} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                  <span><i className="far fa-calendar-alt" style={{ marginRight: '6px' }}></i>{blog.date}</span>
-                  <span><i className="far fa-user" style={{ marginRight: '6px' }}></i>{blog.author}</span>
-                </div>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '16px', lineHeight: '1.4' }}>{blog.title}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>{blog.excerpt}</p>
-                <button style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Đọc thêm <i className="fas fa-arrow-right"></i>
-                </button>
-              </div>
-            </article>
-          ))}
+        <div style={{ textAlign: 'left', marginBottom: '50px' }}>
+           <h3 style={{ fontSize: '28px', fontWeight: '800', color: '#1a1a1a' }}>Cẩm nang du lịch</h3>
+           <div style={{ width: '50px', height: '4px', background: '#0070f3', marginTop: '10px' }}></div>
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px' }}>
+           {blogs.map(blog => (
+             <div key={blog.id} className="animate-up hover-premium" style={{ background: '#fff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+                <img src={blog.img} style={{ width: '100%', height: '240px', objectFit: 'cover' }} alt="Blog Da Nang" />
+                <div style={{ padding: '30px' }}>
+                   <p style={{ fontSize: '13px', color: '#888', fontWeight: '600', marginBottom: '15px' }}>{blog.date}</p>
+                   <h4 style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a1a', lineHeight: '1.4', marginBottom: '20px' }}>{blog.title}</h4>
+                   <a href="#" style={{ color: '#0070f3', fontWeight: '700', textDecoration: 'none', fontSize: '14px' }}>Đọc thêm <i className="fas fa-arrow-right" style={{ marginLeft: '8px' }}></i></a>
+                </div>
+             </div>
+           ))}
+        </div>
+
       </div>
     </div>
   );

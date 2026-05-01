@@ -88,8 +88,8 @@ export const createBooking = async (req, res, next) => {
 
     const [bookingResult] = await connection.query(
       `INSERT INTO bookings
-       (checkin_date, checkout_date, total_guests, special_requests, status, booking_source, total_amount, customer_id, discount_id)
-       VALUES (?, ?, ?, ?, 'PENDING', 'WEBSITE', ?, ?, ?)`,
+       (checkin_date, checkout_date, total_guests, special_requests, status, booking_source, total_amount, customer_id, discount_id, booking_date)
+       VALUES (?, ?, ?, ?, 'PENDING', 'WEBSITE', ?, ?, ?, NOW())`,
       [checkinDate, checkoutDate, totalGuests, specialRequests || null, totalAmount, customerId, discountId]
     );
 
@@ -139,8 +139,8 @@ export const payBooking = async (req, res, next) => {
     }
 
     await pool.query(
-      `INSERT INTO payments (payment_method, transaction_id, status, booking_id, amount)
-       VALUES (?, ?, 'SUCCESS', ?, ?)`,
+      `INSERT INTO payments (payment_method, transaction_id, status, booking_id, amount, payment_date)
+       VALUES (?, ?, 'SUCCESS', ?, ?, NOW())`,
       [paymentMethod || 'BANK_TRANSFER', `TXN-${Date.now()}`, bookingId, booking.total_amount]
     );
 
@@ -169,7 +169,7 @@ export const myBookings = async (req, res, next) => {
        JOIN rooms r ON r.id = bi.room_id
        JOIN room_types rt ON rt.id = r.room_type_id
        WHERE c.user_id = ?
-       ORDER BY b.created_at DESC`,
+       ORDER BY b.create_date DESC`,
       [req.user.userId]
     );
 

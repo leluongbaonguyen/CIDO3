@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --gold: #D4AF37;
+  --gold-light: #F5E6C4;
+  --black: #0B0B0C;
+  --black-light: #111113;
+  --primary: #0B0B0C;
+  --accent: #D4AF37;
+  --white: #ffffff;
+  --gray: #A1A1AA;
+  --gray-light: #f8fafc;
+  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F5E6C4 100%);
+  --shadow-premium: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--white);
+  color: var(--black);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* LUXURY ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* LUXURY BUTTONS */
+.btn-gold {
+  background: var(--gold-gradient);
+  color: var(--black);
+  border: none;
+  padding: 18px 40px;
+  border-radius: 4px; /* Marriott style: sharper corners for luxury */
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: 0.5s;
+  z-index: -1;
+}
+
+.btn-gold:hover::before {
+  left: 100%;
+}
+
+.btn-gold:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3);
+  letter-spacing: 4px;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 20px var(--gold);
+}
+
+/* IMAGE ZOOM EFFECT */
+.img-zoom-container { overflow: hidden; border-radius: 20px; }
+.img-zoom-container img {
+  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.img-zoom-container:hover img {
+  transform: scale(1.1);
+}
+
+/* SECTION HEADINGS */
+.section-title {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.section-title h2 {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 15px;
+}
+.section-title .divider {
+  width: 60px;
+  height: 3px;
+  background: var(--gold);
+  margin: 0 auto;
+}
+/* GLASSMORPHISM */
+.glass-effect {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* LUXURY INPUTS */
+.luxury-input {
+  width: 100%;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.luxury-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.luxury-input:focus {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(196, 166, 97, 0.1);
+}
+
+.luxury-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.btn-accent {
+  background: var(--gold-gradient);
+  color: var(--black);
+  border: none;
+  padding: 18px 30px;
+  border-radius: 4px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.1);
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.2);
+  filter: brightness(1.05);
+}
+
+.text-gold-gradient {
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

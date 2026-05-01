@@ -1,136 +1,185 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
+
+// DỮ LIỆU CỨNG TÀI KHOẢN (MẬT KHẨU: password123)
+const HARDCODED_USERS = {
+  'admin': { email: 'admin@xtravel.com', first_name: 'Bảo Nguyên', role: 'ADMIN', label: 'Quản trị viên' },
+  'staff': { email: 'staff1@xtravel.com', first_name: 'Thị Tuyết', role: 'EMPLOYEE', label: 'Nhân viên' },
+  'customer': { email: 'customer@gmail.com', first_name: 'Thành Công', role: 'CUSTOMER', label: 'Khách hàng' }
+};
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
-  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // HÀM ĐĂNG NHẬP NHANH (1-CLICK)
+  const quickLogin = async (roleKey) => {
+    console.log('Starting quickLogin for:', roleKey);
+    setLoading(true);
+    setError('');
+    const userData = HARDCODED_USERS[roleKey];
+    
+    try {
+        console.log('Calling API for:', userData.email);
+        alert('Đang thử đăng nhập với: ' + userData.email + ' / password123');
+        const data = await api('/auth/login', {
+            method: 'POST',
+            body: {
+                email: userData.email,
+                password: 'password123'
+            }
+        });
+        
+        console.log('Login successful, data:', data);
+        login(data);
+        if (data.user.role === 'ADMIN' || data.user.role === 'EMPLOYEE') {
+            navigate('/admin');
+        } else {
+            navigate('/');
+        }
+    } catch (err) {
+        console.error('Quick login error:', err);
+        setError('Lỗi đăng nhập nhanh: ' + err.message);
+    } finally {
+        setLoading(false);
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // Hardcoded logic to bypass API if backend is not running
-    const hardcodedUsers = {
-      'admin@xtravel.com': { id: 1, email: 'admin@xtravel.com', first_name: 'Admin', role: 'ADMIN' },
-      'staff@xtravel.com': { id: 2, email: 'staff@xtravel.com', first_name: 'Nhân viên', role: 'STAFF' },
-      'customer@gmail.com': { id: 3, email: 'customer@gmail.com', first_name: 'Khách hàng', role: 'CUSTOMER' }
-    };
-
-    const isHardcodedCustomer = form.email === 'customer@gmail.com' && form.password === 'customer123';
-    const isHardcodedAdmin = form.email === 'admin@xtravel.com' && form.password === 'admin123';
-    const isHardcodedStaff = form.email === 'staff@xtravel.com' && form.password === 'staff123';
-
-    if (isHardcodedCustomer || isHardcodedAdmin || isHardcodedStaff) {
-      setTimeout(() => {
-        login({
-          token: 'mock-jwt-token-12345',
-          user: hardcodedUsers[form.email]
-        });
-        if (remember) {
-          localStorage.setItem('rememberedEmail', form.email);
-        }
-        setLoading(false);
-        const role = hardcodedUsers[form.email].role;
-        if (role === 'ADMIN' || role === 'STAFF') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-      }, 500); // simulate network delay
-      return;
-    }
-
+    setError('');
     try {
-      const data = await api('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(form)
-      });
-      login(data);
-      if (remember) {
-        localStorage.setItem('rememberedEmail', form.email);
-      }
-      const role = data.user?.role || data.role;
-      if (role === 'ADMIN' || role === 'STAFF') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
+        const data = await api('/auth/login', {
+            method: 'POST',
+            body: form
+        });
+        login(data);
+        if (data.user.role === 'ADMIN' || data.user.role === 'EMPLOYEE') {
+            navigate('/admin');
+        } else {
+            navigate('/');
+        }
     } catch (err) {
-      setError(err.message === 'Request failed' ? 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.' : err.message);
+        setError(err.message);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-
-  const handleQuickLogin = (email, password) => {
-    setForm({ email, password });
   };
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-main)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
-      <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '16px', boxShadow: 'var(--shadow-lg)', width: '100%', maxWidth: '480px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-dark)', marginBottom: '8px' }}>Đăng nhập XTRAVEL</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Chào mừng bạn đến với khách sạn của chúng tôi</p>
+    <div style={{ 
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80")',
+      backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative',
+      padding: '40px 20px'
+    }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.6) 100%)' }}></div>
+
+      <div className="glass-effect" style={{ 
+        padding: '50px', borderRadius: '32px', width: '100%', maxWidth: '550px', 
+        position: 'relative', zIndex: 10, animation: 'fadeInUp 0.8s ease-out' 
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{ 
+            width: '70px', height: '70px', background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%)', 
+            borderRadius: '20px', display: 'flex', justifyContent: 'center', 
+            alignItems: 'center', margin: '0 auto 24px', boxShadow: '0 15px 30px rgba(196,166,97,0.3)' 
+          }}>
+             <i className="fas fa-crown" style={{ color: '#fff', fontSize: '32px' }}></i>
+          </div>
+          <h2 style={{ fontSize: '36px', fontWeight: '900', color: '#fff', marginBottom: '12px', letterSpacing: '-1px' }} className="serif">TRUY CẬP HỆ THỐNG</h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '15px' }}>Trải nghiệm dịch vụ nghỉ dưỡng thượng lưu tại XTRAVEL</p>
         </div>
 
-        <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: 'var(--primary-light)', borderRadius: '8px' }}>
-          <p style={{ color: 'var(--primary)', fontWeight: '600', marginBottom: '12px', fontSize: '14px', textAlign: 'center' }}><i className="fas fa-info-circle"></i> Tài khoản thử nghiệm (Click để điền)</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
-            <button type="button" onClick={() => handleQuickLogin('admin@xtravel.com', 'admin123')} style={{ backgroundColor: '#fff', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>Admin (Quản trị viên)</button>
-            <button type="button" onClick={() => handleQuickLogin('staff@xtravel.com', 'staff123')} style={{ backgroundColor: '#fff', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>Staff (Nhân viên)</button>
-            <button type="button" onClick={() => handleQuickLogin('customer@gmail.com', 'customer123')} style={{ backgroundColor: '#fff', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}>Customer (Khách hàng)</button>
+        {error && (
+          <div style={{ padding: '15px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', color: '#ef4444', marginBottom: '25px', fontSize: '14px', fontWeight: '600', textAlign: 'center' }}>
+            <i className="fas fa-exclamation-circle" style={{ marginRight: '8px' }}></i> {error}
           </div>
+        )}
+
+        {/* QUICK LOGIN BUTTONS (NEW FEATURE) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '40px' }}>
+           <QuickLoginBtn 
+             icon="fa-user-shield" label="ADMIN" color="#ef4444" 
+             onClick={() => quickLogin('admin')} 
+             disabled={loading}
+           />
+           <QuickLoginBtn 
+             icon="fa-user-tie" label="STAFF" color="#3b82f6" 
+             onClick={() => quickLogin('staff')} 
+             disabled={loading}
+           />
+           <QuickLoginBtn 
+             icon="fa-user" label="GUEST" color="#10b981" 
+             onClick={() => quickLogin('customer')} 
+             disabled={loading}
+           />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' }}>
+           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+           <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: '700' }}>HOẶC DÙNG TÀI KHOẢN</span>
+           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
         </div>
 
         <form onSubmit={onSubmit}>
-          {error && <div style={{ padding: '12px', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}><i className="fas fa-exclamation-circle"></i> {error}</div>}
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Email</label>
+          <div style={{ marginBottom: '24px' }}>
+            <label className="luxury-label">Email tài khoản</label>
             <input
-              type="email"
-              value={form.email}
+              type="email" placeholder="example@xtravel.com" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="luxury-input"
               required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)', fontSize: '15px' }}
             />
           </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)', marginBottom: '8px' }}>Mật khẩu</label>
+          <div style={{ marginBottom: '32px' }}>
+            <label className="luxury-label">Mật khẩu bảo mật</label>
             <input
-              type="password"
-              value={form.password}
+              type="password" placeholder="••••••••" value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="luxury-input"
               required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)', fontSize: '15px' }}
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', fontSize: '14px' }}>
-            <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dark)' }}>
-              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-              Ghi nhớ đăng nhập
-            </label>
-            <Link to="#" style={{ color: 'var(--primary)', fontWeight: '500', textDecoration: 'none' }}>Quên mật khẩu?</Link>
-          </div>
-
-          <button type="submit" disabled={loading} style={{ width: '100%', backgroundColor: 'var(--secondary)', color: '#fff', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.target.style.backgroundColor = 'var(--secondary-hover)'} onMouseLeave={e => e.target.style.backgroundColor = 'var(--secondary)'}>
-            {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG NHẬP'}
+          <button type="submit" disabled={loading} className="btn-accent" style={{ width: '100%', opacity: loading ? 0.7 : 1 }}>
+            {loading ? 'ĐANG XỬ LÝ...' : 'ĐĂNG NHẬP NGAY'}
           </button>
-
-          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: 'var(--text-muted)' }}>
-            Chưa có tài khoản? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>Đăng ký ngay</Link>
-          </div>
         </form>
+
+        <div style={{ textAlign: 'center', marginTop: '30px' }}>
+           <Link to="/register" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '14px' }}>
+             Chưa có tài khoản? <span style={{ color: '#ff5a3d', fontWeight: '700' }}>Đăng ký ngay</span>
+           </Link>
+        </div>
       </div>
     </div>
+  );
+}
+
+function QuickLoginBtn({ icon, label, color, onClick, disabled }) {
+  return (
+    <button 
+      onClick={onClick}
+      disabled={disabled}
+      style={{ 
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+        padding: '20px 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '16px', cursor: 'pointer', transition: 'all 0.3s', color: '#fff'
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = color; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+    >
+      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: `${color}20`, color: color, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}>
+        <i className={`fas ${icon}`}></i>
+      </div>
+      <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px' }}>{label}</span>
+    </button>
   );
 }

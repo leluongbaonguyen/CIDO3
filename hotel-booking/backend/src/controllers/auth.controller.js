@@ -38,7 +38,7 @@ export const register = async (req, res, next) => {
     await pool.query(
       `INSERT INTO customers (user_id, address, city, country, id_number)
        VALUES (?, ?, ?, ?, ?)`,
-      [userId, address || null, city || null, country || null, idNumber || null]
+      [userId, address || '', city || '', country || '', idNumber || `ID-${Date.now()}`]
     );
 
     const token = signToken({ userId, role: 'CUSTOMER' });
