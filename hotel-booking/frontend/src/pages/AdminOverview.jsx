@@ -65,7 +65,7 @@ export default function AdminOverview() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
           <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'var(--primary)', letterSpacing: '-1px' }}>Hệ Thống Đang Vận Hành Ổn Định</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Dữ liệu tổng hợp từ toàn bộ chuỗi resort XTRAVEL.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Dữ liệu tổng hợp từ toàn bộ chuỗi resort BOOKING X.</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
            {stats.totalRooms === 0 && (

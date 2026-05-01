@@ -65,12 +65,14 @@ export const login = async (req, res, next) => {
 
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
     if (rows.length === 0) {
+      console.log('Login failed: Email not found:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const user = rows[0];
     const matched = await comparePassword(password, user.password);
     if (!matched) {
+      console.log('Login failed: Password mismatch for:', email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -126,6 +128,38 @@ export const getProfile = async (req, res, next) => {
         idNumber: user.id_number
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const [rows] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Email không tồn tại trong hệ thống.' });
+    }
+    
+    // Trong thực tế sẽ gửi email chứa token. 
+    // Ở đây ta giả lập bằng cách trả về thông báo thành công.
+    res.json({ message: 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, newPassword } = req.body;
+    const hashed = await hashPassword(newPassword);
+    
+    const [result] = await pool.query('UPDATE users SET password = ? WHERE email = ?', [hashed, email]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Không thể cập nhật mật khẩu.' });
+    }
+    
+    res.json({ message: 'Mật khẩu đã được thay đổi thành công.' });
   } catch (error) {
     next(error);
   }

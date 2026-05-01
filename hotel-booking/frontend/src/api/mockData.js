@@ -1,9 +1,9 @@
 const generateRooms = () => {
   const types = [
-    { name: 'Standard', price: 500000, max: 2, img: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800' },
-    { name: 'Superior', price: 850000, max: 2, img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800' },
-    { name: 'Deluxe', price: 1200000, max: 3, img: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800' },
-    { name: 'Suite', price: 2500000, max: 4, img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800' }
+    { name: 'Standard', price: 500000, max: 2, img: '/images/img_17b443d955.jpg' },
+    { name: 'Superior', price: 850000, max: 2, img: '/images/img_8bbef260cb.jpg' },
+    { name: 'Deluxe', price: 1200000, max: 3, img: '/images/img_737e262d84.jpg' },
+    { name: 'Suite', price: 2500000, max: 4, img: '/images/img_2fd834ff67.jpg' }
   ];
   
   const rooms = [];

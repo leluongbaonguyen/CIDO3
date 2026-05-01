@@ -5,27 +5,72 @@ const diffNights = (checkin, checkout) => {
   return Math.max(1, Math.ceil((new Date(checkout) - new Date(checkin)) / oneDay));
 };
 
+const getOrCreateCustomer = async (connection, user, guestInfo) => {
+  if (user) {
+    const [customerRows] = await connection.query(
+      'SELECT id FROM customers WHERE user_id = ? LIMIT 1',
+      [user.userId]
+    );
+    if (customerRows.length > 0) return customerRows[0].id;
+    
+    // If user exists but no customer profile, create one
+    const [userRows] = await connection.query('SELECT * FROM users WHERE id = ?', [user.userId]);
+    const u = userRows[0];
+    const [res] = await connection.query(
+      'INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)',
+      [user.userId, 'N/A', 'N/A', 'N/A', `GUEST-${Date.now()}`]
+    );
+    return res.insertId;
+  }
+
+  if (!guestInfo || !guestInfo.email) {
+    throw new Error('Missing guest information');
+  }
+
+  // Check if user with this email already exists
+  const [existingUser] = await connection.query('SELECT id FROM users WHERE email = ?', [guestInfo.email]);
+  let userId;
+  
+  if (existingUser.length > 0) {
+    userId = existingUser[0].id;
+  } else {
+    // Create guest user
+    const [newUser] = await connection.query(
+      'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, "CUSTOMER")',
+      [guestInfo.email, 'GUEST_PASS', guestInfo.firstName || 'Guest', guestInfo.lastName || 'User', guestInfo.phone || null]
+    );
+    userId = newUser.insertId;
+  }
+
+  // Check if customer profile exists
+  const [existingCustomer] = await connection.query('SELECT id FROM customers WHERE user_id = ?', [userId]);
+  if (existingCustomer.length > 0) return existingCustomer[0].id;
+
+  // Create customer profile
+  const [newCustomer] = await connection.query(
+    'INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)',
+    [userId, guestInfo.address || 'N/A', guestInfo.city || 'N/A', guestInfo.country || 'N/A', `GUEST-${Date.now()}`]
+  );
+  return newCustomer.insertId;
+};
+
 export const createBooking = async (req, res, next) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    const { roomId, checkinDate, checkoutDate, totalGuests, specialRequests, discountCode } = req.body;
+    const { roomId, checkinDate, checkoutDate, totalGuests, specialRequests, discountCode, guestInfo } = req.body;
 
     if (!roomId || !checkinDate || !checkoutDate || !totalGuests) {
       return res.status(400).json({ message: 'Missing booking data' });
     }
 
-    const [customerRows] = await connection.query(
-      'SELECT id FROM customers WHERE user_id = ? LIMIT 1',
-      [req.user.userId]
-    );
-
-    if (customerRows.length === 0) {
-      return res.status(404).json({ message: 'Customer profile not found' });
+    let customerId;
+    try {
+        customerId = await getOrCreateCustomer(connection, req.user, guestInfo);
+    } catch (err) {
+        return res.status(400).json({ message: err.message });
     }
-
-    const customerId = customerRows[0].id;
 
     const [roomRows] = await connection.query(
       `SELECT r.id, r.status, rt.base_price, rt.max_occupancy
@@ -55,7 +100,10 @@ export const createBooking = async (req, res, next) => {
        FROM booking_items bi
        JOIN bookings b ON b.id = bi.booking_id
        WHERE bi.room_id = ?
-         AND b.status IN ('PENDING', 'CONFIRMED')
+         AND (
+           b.status = 'CONFIRMED' 
+           OR (b.status = 'PENDING' AND b.create_date > DATE_SUB(NOW(), INTERVAL 15 MINUTE))
+         )
          AND NOT (b.checkout_date <= ? OR b.checkin_date >= ?)
        LIMIT 1`,
       [roomId, checkinDate, checkoutDate]
@@ -122,10 +170,9 @@ export const payBooking = async (req, res, next) => {
     const [rows] = await pool.query(
       `SELECT b.id, b.total_amount, b.status
        FROM bookings b
-       JOIN customers c ON c.id = b.customer_id
-       WHERE b.id = ? AND c.user_id = ?
+       WHERE b.id = ?
        LIMIT 1`,
-      [bookingId, req.user.userId]
+      [bookingId]
     );
 
     if (rows.length === 0) {
@@ -138,10 +185,21 @@ export const payBooking = async (req, res, next) => {
       return res.status(400).json({ message: 'Cannot pay cancelled booking' });
     }
 
+    let dbMethod = 'TRANSFER';
+    let dbStatus = 'SUCCESS';
+
+    if (paymentMethod === 'CASH') {
+        dbMethod = 'CASH';
+        dbStatus = 'PENDING'; // Sẽ thanh toán sau
+    } else if (paymentMethod === 'CREDIT_CARD') {
+        dbMethod = 'CARD';
+        dbStatus = 'SUCCESS';
+    }
+
     await pool.query(
       `INSERT INTO payments (payment_method, transaction_id, status, booking_id, amount, payment_date)
-       VALUES (?, ?, 'SUCCESS', ?, ?, NOW())`,
-      [paymentMethod || 'BANK_TRANSFER', `TXN-${Date.now()}`, bookingId, booking.total_amount]
+       VALUES (?, ?, ?, ?, ?, NOW())`,
+      [dbMethod, `TXN-${Date.now()}`, dbStatus, bookingId, booking.total_amount]
     );
 
     await pool.query(
@@ -201,7 +259,6 @@ export const cancelBooking = async (req, res, next) => {
       return res.status(400).json({ message: 'Booking already cancelled' });
     }
 
-    // Business Logic: Only allow cancellation if more than 24h before check-in
     const checkinTime = new Date(booking.checkin_date).getTime();
     const now = new Date().getTime();
     const hoursLeft = (checkinTime - now) / (1000 * 60 * 60);

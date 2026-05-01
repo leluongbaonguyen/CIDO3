@@ -3,7 +3,7 @@ import { useState } from 'react';
 export default function Chatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { sender: 'bot', text: 'Xin chào! XTRAVEL có thể giúp gì cho quý khách?' }
+        { sender: 'bot', text: 'Xin chào! BOOKING X có thể giúp gì cho quý khách?' }
     ]);
     const [input, setInput] = useState('');
 
@@ -53,7 +53,7 @@ export default function Chatbot() {
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent)', color: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                <i className="fas fa-robot"></i>
                             </div>
-                            <span>XTRAVEL AI ASSISTANT</span>
+                            <span>BOOKING X AI ASSISTANT</span>
                         </div>
                         <i className="fas fa-times" style={{ cursor: 'pointer', opacity: 0.7 }} onClick={() => setIsOpen(false)}></i>
                     </div>

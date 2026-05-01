@@ -12,6 +12,7 @@ import AboutPage from './pages/AboutPage';
 import BlogPage from './pages/BlogPage';
 import GalleryPage from './pages/GalleryPage';
 import BookingPage from './pages/BookingPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/rooms/:id" element={<RoomDetailPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

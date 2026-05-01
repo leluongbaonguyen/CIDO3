@@ -2,9 +2,9 @@ import React from 'react';
 
 export default function BlogPage() {
   const blogs = [
-    { id: 1, title: 'Top 5 hoạt động không thể bỏ qua khi nghỉ dưỡng tại XTRAVEL', date: '20 Th04, 2026', img: 'https://images.pexels.com/photos/1105191/pexels-photo-1105191.jpeg?auto=compress&cs=tinysrgb&w=800' },
-    { id: 2, title: 'Cẩm nang thưởng thức ẩm thực tinh túy tại nhà hàng Blue Ocean', date: '15 Th04, 2026', img: 'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?auto=compress&cs=tinysrgb&w=800' },
-    { id: 3, title: 'Bí quyết đặt phòng giá tốt nhất mùa cao điểm', date: '10 Th04, 2026', img: 'https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=800' }
+    { id: 1, title: 'Top 5 hoạt động không thể bỏ qua khi nghỉ dưỡng tại BOOKING X', date: '20 Th04, 2026', img: '/images/img_6f8ad18268.jpeg' },
+    { id: 2, title: 'Cẩm nang thưởng thức ẩm thực tinh túy tại nhà hàng Blue Ocean', date: '15 Th04, 2026', img: '/images/img_3e8afbec1f.jpeg' },
+    { id: 3, title: 'Bí quyết đặt phòng giá tốt nhất mùa cao điểm', date: '10 Th04, 2026', img: '/images/img_d31fdb5400.jpeg' }
   ];
 
   return (
@@ -13,10 +13,10 @@ export default function BlogPage() {
         
         {/* FEATURED POST - CẦU RỒNG ĐÀ NẴNG */}
         <div className="animate-up" style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', height: '500px', marginBottom: '80px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
-           <img src="https://images.pexels.com/photos/1010651/pexels-photo-1010651.jpeg?auto=compress&cs=tinysrgb&w=1600" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Da Nang" />
+           <img src="/images/img_7b0b87cdb2.jpeg" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Da Nang" />
            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.8))', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '60px' }}>
               <span style={{ background: '#ff5a3d', color: '#fff', padding: '8px 20px', borderRadius: '50px', fontSize: '13px', fontWeight: '700', width: 'fit-content', marginBottom: '20px' }}>KHÁM PHÁ</span>
-              <h2 style={{ fontSize: '42px', color: '#fff', fontWeight: '800', maxWidth: '800px', lineHeight: '1.2' }}>Hành trình khám phá vẻ đẹp kỳ ảo của Đà Nẵng từ tầm nhìn của XTRAVEL</h2>
+              <h2 style={{ fontSize: '42px', color: '#fff', fontWeight: '800', maxWidth: '800px', lineHeight: '1.2' }}>Hành trình khám phá vẻ đẹp kỳ ảo của Đà Nẵng từ tầm nhìn của BOOKING X</h2>
            </div>
         </div>
 

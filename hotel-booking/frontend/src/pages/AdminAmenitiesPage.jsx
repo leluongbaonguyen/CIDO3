@@ -90,51 +90,78 @@ export default function AdminAmenitiesPage() {
          </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
         {filtered.map((item) => (
-          <div key={item.id} className="card-luxury-premium shine-on-hover" style={{ padding: '25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div key={item.id} className="card-luxury-premium" style={{ 
+            padding: '30px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(196, 166, 97, 0.2)', borderRadius: '24px',
+            transition: '0.4s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+          }} onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-8px)';
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(196, 166, 97, 0.15)';
+            e.currentTarget.style.borderColor = 'rgba(196, 166, 97, 0.5)';
+          }} onMouseLeave={e => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.03)';
+            e.currentTarget.style.borderColor = 'rgba(196, 166, 97, 0.2)';
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
               <div style={{ 
-                width: '60px', height: '60px', borderRadius: '16px', 
-                background: 'rgba(196, 166, 97, 0.1)', color: 'var(--gold)', 
-                display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px',
+                width: '70px', height: '70px', borderRadius: '20px', 
+                background: 'var(--gold-gradient)', color: '#fff', 
+                display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '28px',
+                boxShadow: '0 10px 20px rgba(196, 166, 97, 0.3)'
               }}>
                 <i className={`fas ${item.icon || 'fa-concierge-bell'}`}></i>
               </div>
               <div>
-                <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '18px', marginBottom: '4px' }}>{item.name}</div>
-                <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>ID: #00{item.id}</div>
+                <div style={{ fontWeight: '900', color: 'var(--primary)', fontSize: '20px', marginBottom: '6px', fontFamily: '"Playfair Display", serif' }}>{item.name}</div>
+                <div style={{ fontSize: '10px', color: 'var(--gold)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px' }}>SERVICE ID: #00{item.id}</div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <button onClick={() => handleOpenModal(item)} style={{ width: '36px', height: '36px', borderRadius: '10px', border: 'none', background: '#f8fafc', color: '#64748b', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
-              <button onClick={() => handleDelete(item.id)} style={{ width: '36px', height: '36px', borderRadius: '10px', border: 'none', background: '#f8fafc', color: '#64748b', cursor: 'pointer' }}><i className="fas fa-trash-alt"></i></button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button onClick={() => handleOpenModal(item)} style={{ width: '40px', height: '40px', borderRadius: '12px', border: 'none', background: 'rgba(10, 15, 29, 0.05)', color: 'var(--primary)', cursor: 'pointer', transition: '0.3s' }} onMouseEnter={e => e.target.style.background = 'rgba(10, 15, 29, 0.1)'} onMouseLeave={e => e.target.style.background = 'rgba(10, 15, 29, 0.05)'}><i className="fas fa-edit"></i></button>
+              <button onClick={() => handleDelete(item.id)} style={{ width: '40px', height: '40px', borderRadius: '12px', border: 'none', background: 'rgba(239, 68, 68, 0.05)', color: '#ef4444', cursor: 'pointer', transition: '0.3s' }} onMouseEnter={e => e.target.style.background = 'rgba(239, 68, 68, 0.1)'} onMouseLeave={e => e.target.style.background = 'rgba(239, 68, 68, 0.05)'}><i className="fas fa-trash-alt"></i></button>
             </div>
           </div>
         ))}
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', width: '450px', borderRadius: '24px', padding: '32px' }}>
-            <h3 style={{ marginBottom: '24px' }}>{editingItem ? 'Sửa tiện nghi' : 'Thêm tiện nghi'}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,15,29,0.85)', backdropFilter: 'blur(15px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.4s ease' }}>
+          <form onSubmit={handleSubmit} style={{ 
+            backgroundColor: '#0a0f1d', width: '500px', borderRadius: '32px', padding: '50px', 
+            border: '1px solid rgba(196, 166, 97, 0.2)',
+            boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
+            position: 'relative', overflow: 'hidden'
+          }}>
+            <h3 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--gold)', marginBottom: '40px', fontFamily: '"Playfair Display", serif', letterSpacing: '1px' }}>
+               {editingItem ? 'Hiệu chỉnh tiện nghi' : 'Thiết lập tiện nghi mới'}
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
               <div>
-                <label className="luxury-label">Tên tiện nghi</label>
-                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Tên tiện nghi</label>
+                <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} 
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196, 166, 97, 0.3)', borderRadius: '12px', color: '#fff', padding: '15px' }} />
               </div>
               <div>
-                <label className="luxury-label">Icon (FontAwesome class)</label>
-                <input required value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Icon (FontAwesome class)</label>
+                <input required value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} 
+                   style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196, 166, 97, 0.3)', borderRadius: '12px', color: '#fff', padding: '15px' }} />
               </div>
               <div>
-                <label className="luxury-label">Mô tả</label>
-                <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', resize: 'none' }} rows={3} />
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Mô tả tiện ích</label>
+                <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} 
+                  style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '1px solid rgba(196, 166, 97, 0.3)', background: 'rgba(255,255,255,0.03)', color: '#fff', resize: 'none' }} rows={3} />
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
-              <button type="button" onClick={() => setShowModal(false)} className="btn-gold" style={{ background: '#f1f5f9', color: '#64748b', padding: '10px 20px' }}>HỦY</button>
-              <button type="submit" className="btn-gold" style={{ padding: '10px 30px' }}>LƯU LẠI</button>
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '20px', marginTop: '50px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '16px 35px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', cursor: 'pointer', fontSize: '13px' }}>HỦY BỎ</button>
+              <button type="submit" className="btn-gold" style={{ padding: '16px 40px', fontSize: '13px', borderRadius: '14px', boxShadow: '0 10px 25px rgba(196, 166, 97, 0.3)' }}>LƯU THAY ĐỔI</button>
             </div>
           </form>
         </div>

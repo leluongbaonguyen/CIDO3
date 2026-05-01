@@ -22,11 +22,12 @@ export default function Layout({ children }) {
           padding: '15px 0', transition: '0.4s'
         }}>
           <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
-               <div style={{ width: '40px', height: '40px', background: 'var(--gold)', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px', color: '#fff' }}>
-                  <i className="fas fa-h-square"></i>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '15px' }}>
+               <img src="/logo.png" alt="BOOKING X Logo" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+               <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '2px', lineHeight: '1' }}>BOOKING X</span>
+                  <span style={{ fontSize: '8px', fontWeight: '800', color: 'var(--gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>Luxury Hotel</span>
                </div>
-               <span style={{ fontSize: '24px', fontWeight: '900', color: '#fff', letterSpacing: '2px' }}>XTRAVEL</span>
             </Link>
 
             <nav style={{ display: 'flex', gap: '35px', alignItems: 'center' }}>
@@ -71,7 +72,10 @@ export default function Layout({ children }) {
           <div className="container">
             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '60px', marginBottom: '80px' }}>
               <div>
-                 <h3 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)', marginBottom: '25px', letterSpacing: '2px' }}>XTRAVEL</h3>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
+                    <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                    <h3 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)', margin: 0, letterSpacing: '2px' }}>BOOKING X</h3>
+                 </div>
                  <p style={{ opacity: 0.6, lineHeight: '1.8', fontSize: '14px' }}>Nơi hội tụ của sự sang trọng và tinh tế. Chúng tôi mang đến những trải nghiệm nghỉ dưỡng đẳng cấp quốc tế tại trung tâm thành phố biển Đà Nẵng.</p>
                  <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
                     <SocialIcon icon="fab fa-facebook-f" />
@@ -103,7 +107,7 @@ export default function Layout({ children }) {
               </div>
             </div>
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '40px', textAlign: 'center', fontSize: '12px', opacity: 0.4 }}>
-               &copy; 2026 XTRAVEL LUXURY RESORT. ALL RIGHTS RESERVED.
+               &copy; 2026 BOOKING X LUXURY RESORT. ALL RIGHTS RESERVED.
             </div>
           </div>
         </footer>

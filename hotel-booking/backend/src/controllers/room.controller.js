@@ -88,7 +88,10 @@ export const listRooms = async (req, res, next) => {
           SELECT bi.room_id
           FROM booking_items bi
           JOIN bookings b ON b.id = bi.booking_id
-          WHERE b.status IN ('PENDING', 'CONFIRMED')
+          WHERE (
+            b.status = 'CONFIRMED' 
+            OR (b.status = 'PENDING' AND b.create_date > DATE_SUB(NOW(), INTERVAL 15 MINUTE))
+          )
             AND (b.checkin_date < ? AND b.checkout_date > ?)
         )
       `;

@@ -295,10 +295,10 @@ INSERT INTO amenities (name, description, icon) VALUES
 
 -- 3.6 Room Types
 INSERT INTO room_types (id, name, description, base_price, max_occupancy, photo_urls) VALUES
-(1, 'Standard Room', 'Phòng tiêu chuẩn đầy đủ tiện nghi, phù hợp cho 2 người.', 500000, 2, '["https://images.unsplash.com/photo-1590490360182-c33d57733427"]'),
-(2, 'Deluxe Room', 'Phòng sang trọng với view thành phố và nội thất cao cấp.', 850000, 2, '["https://images.unsplash.com/photo-1566665797739-1674de7a421a"]'),
-(3, 'Suite Family', 'Phòng gia đình rộng rãi, 2 giường lớn, view biển.', 1500000, 4, '["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b"]'),
-(4, 'Penthouse Executive', 'Đẳng cấp thượng lưu với hồ bơi riêng và quản gia.', 5000000, 4, '["https://images.unsplash.com/photo-1578683010236-d716f9a3f461"]');
+(1, 'Standard Room', 'Phòng tiêu chuẩn đầy đủ tiện nghi, phù hợp cho 2 người.', 500000, 2, '["/images/img_bb9c76ea50.jpg"]'),
+(2, 'Deluxe Room', 'Phòng sang trọng với view thành phố và nội thất cao cấp.', 850000, 2, '["/images/img_76b5d3d850.jpg"]'),
+(3, 'Suite Family', 'Phòng gia đình rộng rãi, 2 giường lớn, view biển.', 1500000, 4, '["/images/img_2de9b7b582.jpg"]'),
+(4, 'Penthouse Executive', 'Đẳng cấp thượng lưu với hồ bơi riêng và quản gia.', 5000000, 4, '["/images/img_f2813391d9.jpg"]');
 
 -- 3.7 Room Type Amenities mapping
 INSERT INTO room_type_amenities (room_type_id, amenity_id) VALUES

@@ -5,9 +5,9 @@ import { api } from '../api/client';
 
 // DỮ LIỆU CỨNG TÀI KHOẢN (MẬT KHẨU: password123)
 const HARDCODED_USERS = {
-  'admin': { email: 'admin@xtravel.com', first_name: 'Bảo Nguyên', role: 'ADMIN', label: 'Quản trị viên' },
-  'staff': { email: 'staff1@xtravel.com', first_name: 'Thị Tuyết', role: 'EMPLOYEE', label: 'Nhân viên' },
-  'customer': { email: 'customer@gmail.com', first_name: 'Thành Công', role: 'CUSTOMER', label: 'Khách hàng' }
+  'admin': { email: 'admin@luxuryhotel.vn', first_name: 'Admin', role: 'ADMIN', label: 'Quản trị viên' },
+  'staff': { email: 'staff1@luxuryhotel.vn', first_name: 'Staff 1', role: 'EMPLOYEE', label: 'Nhân viên' },
+  'customer': { email: 'customer1@luxuryhotel.vn', first_name: 'Customer 1', role: 'CUSTOMER', label: 'Khách hàng' }
 };
 
 export default function LoginPage() {
@@ -26,12 +26,11 @@ export default function LoginPage() {
     
     try {
         console.log('Calling API for:', userData.email);
-        alert('Đang thử đăng nhập với: ' + userData.email + ' / password123');
         const data = await api('/auth/login', {
             method: 'POST',
             body: {
                 email: userData.email,
-                password: 'password123'
+                password: 'admin123'
             }
         });
         
@@ -75,7 +74,7 @@ export default function LoginPage() {
   return (
     <div style={{ 
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80")',
+      backgroundImage: 'url("/images/img_5546ffb0c3.jpg")',
       backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative',
       padding: '40px 20px'
     }}>
@@ -94,7 +93,7 @@ export default function LoginPage() {
              <i className="fas fa-crown" style={{ color: '#fff', fontSize: '32px' }}></i>
           </div>
           <h2 style={{ fontSize: '36px', fontWeight: '900', color: '#fff', marginBottom: '12px', letterSpacing: '-1px' }} className="serif">TRUY CẬP HỆ THỐNG</h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '15px' }}>Trải nghiệm dịch vụ nghỉ dưỡng thượng lưu tại XTRAVEL</p>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '15px' }}>Trải nghiệm dịch vụ nghỉ dưỡng thượng lưu tại BOOKING X</p>
         </div>
 
         {error && (
@@ -132,14 +131,17 @@ export default function LoginPage() {
           <div style={{ marginBottom: '24px' }}>
             <label className="luxury-label">Email tài khoản</label>
             <input
-              type="email" placeholder="example@xtravel.com" value={form.email}
+              type="email" placeholder="example@BOOKING X.com" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="luxury-input"
               required
             />
           </div>
           <div style={{ marginBottom: '32px' }}>
-            <label className="luxury-label">Mật khẩu bảo mật</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <label className="luxury-label" style={{ marginBottom: 0 }}>Mật khẩu bảo mật</label>
+                <Link to="/forgot-password" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontWeight: '600' }}>Quên mật khẩu?</Link>
+            </div>
             <input
               type="password" placeholder="••••••••" value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}

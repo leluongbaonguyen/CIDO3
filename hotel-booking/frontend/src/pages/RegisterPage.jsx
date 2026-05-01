@@ -43,7 +43,7 @@ export default function RegisterPage() {
   return (
     <div style={{ 
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80")',
+      backgroundImage: 'url("/images/img_5546ffb0c3.jpg")',
       backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative',
       padding: '40px 20px'
     }}>
@@ -63,7 +63,7 @@ export default function RegisterPage() {
              <i className="fas fa-crown" style={{ color: '#fff', fontSize: '32px' }}></i>
           </div>
           <h2 style={{ fontSize: '42px', fontWeight: '900', color: '#fff', marginBottom: '12px', letterSpacing: '-1px' }} className="serif">KHỞI ĐẦU KỲ NGHỈ TRONG MƠ</h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '16px' }}>Trở thành thành viên XTRAVEL để nhận đặc quyền thượng lưu</p>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '500', fontSize: '16px' }}>Trở thành thành viên BOOKING X để nhận đặc quyền thượng lưu</p>
         </div>
 
         <form onSubmit={onSubmit}>
@@ -83,7 +83,7 @@ export default function RegisterPage() {
                   <InputGroup label="Họ" value={form.lastName} onChange={v => setForm({...form, lastName: v})} placeholder="Nguyễn" />
                   <InputGroup label="Tên" value={form.firstName} onChange={v => setForm({...form, firstName: v})} placeholder="Văn A" />
                </div>
-               <InputGroup label="Email liên hệ" type="email" value={form.email} onChange={v => setForm({...form, email: v})} placeholder="example@xtravel.com" />
+               <InputGroup label="Email liên hệ" type="email" value={form.email} onChange={v => setForm({...form, email: v})} placeholder="example@BOOKING X.com" />
                <InputGroup label="Mật khẩu bảo mật" type="password" value={form.password} onChange={v => setForm({...form, password: v})} placeholder="••••••••" />
                <InputGroup label="Số điện thoại" value={form.phone} onChange={v => setForm({...form, phone: v})} placeholder="0901 234 567" />
             </div>

@@ -76,6 +76,29 @@ export default function RoomsPage() {
     setSearchParams(newParams);
   };
 
+  const getDisplayImage = (photoUrls) => {
+    if (!photoUrls || photoUrls === 'null' || photoUrls === 'undefined') return '/images/rooms/std-1.jpg';
+    try {
+      // Xử lý nếu là JSON string
+      const urls = typeof photoUrls === 'string' && (photoUrls.startsWith('[') || photoUrls.startsWith('{')) 
+        ? JSON.parse(photoUrls) 
+        : photoUrls;
+        
+      if (Array.isArray(urls) && urls.length > 0) return urls[0];
+      if (typeof urls === 'string') {
+        const cleaned = urls.replace(/[\[\]"]/g, '').split(',')[0].trim();
+        return cleaned || '/images/rooms/std-1.jpg';
+      }
+      return '/images/rooms/std-1.jpg';
+    } catch (e) {
+      // Fallback cho chuỗi phân cách dấu phẩy hoặc chuỗi đơn
+      if (typeof photoUrls === 'string') {
+        return photoUrls.split(',')[0].replace(/[\[\]"]/g, '').trim() || '/images/rooms/std-1.jpg';
+      }
+      return '/images/rooms/std-1.jpg';
+    }
+  };
+
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--black)' }}>
       <div className="loader"></div>
@@ -154,7 +177,7 @@ export default function RoomsPage() {
                     <div key={room.id} className="card-luxury" style={{ display: 'grid', gridTemplateColumns: '380px 1fr 260px' }}>
                       
                       <div className="img-zoom-container" style={{ height: '320px', borderRadius: '0' }}>
-                         <img src={room.photo_urls?.split(',')[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={room.room_type_name} />
+                         <img src={getDisplayImage(room.photo_urls)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={room.room_type_name} />
                          <div style={{ position: 'absolute', top: '20px', left: '20px', background: 'var(--gold)', color: '#fff', padding: '8px 15px', borderRadius: '8px', fontSize: '11px', fontWeight: '800' }}>{room.room_number}</div>
                       </div>
 

@@ -49,16 +49,10 @@ export default function AdminDashboard() {
         boxShadow: '10px 0 30px rgba(0,0,0,0.2)'
       }}>
         {/* Sidebar Header */}
-        <div style={{ padding: '40px 24px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ 
-            width: '45px', height: '45px', background: 'var(--gold-gradient)', 
-            borderRadius: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-            boxShadow: '0 8px 15px rgba(212, 175, 55, 0.3)'
-          }}>
-             <i className="fas fa-crown" style={{ color: 'var(--black)', fontSize: '20px' }}></i>
-          </div>
+        <div style={{ padding: '30px 24px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <img src="/logo.png" alt="BOOKING X" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-             <span style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '2px', fontFamily: 'Playfair Display' }}>XTRAVEL</span>
+             <span style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '2px', fontFamily: 'Playfair Display', lineHeight: '1.2' }}>BOOKING X</span>
              <span style={{ fontSize: '8px', fontWeight: '800', color: 'var(--gold)', letterSpacing: '3px', textTransform: 'uppercase' }}>Luxury Hotel Booking</span>
           </div>
         </div>

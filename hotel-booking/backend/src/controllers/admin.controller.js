@@ -396,18 +396,18 @@ export const seedData = async (req, res, next) => {
         await connection.query('SET FOREIGN_KEY_CHECKS = 1');
 
         // 2. Tạo tài khoản mẫu (Password: password123)
-        const hashedPw = '$2a$10$X8O7k6uY9fR7/qW3H2G5ueX8p.qBfXvYy.RzE6O1k8P9Q4W3G2H2'; 
+        const hashedPw = hashPassword('password123');
         
         // Admin
-        const [adminRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['admin@xtravel.com', hashedPw, 'Bảo Nguyên', 'Lê', 'ADMIN', 'ACTIVE']);
+        const [adminRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['admin@bookingx.com', hashedPw, 'Bảo Nguyên', 'Lê', 'ADMIN', 'ACTIVE']);
         await connection.query("INSERT INTO employees (user_id, position, department) VALUES (?, ?, ?)", [adminRes.insertId, 'Tổng quản lý', 'Hội đồng quản trị']);
 
         // Staff
-        const [staffRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['staff@xtravel.com', hashedPw, 'Thị Tuyết', 'Nguyễn', 'EMPLOYEE', 'ACTIVE']);
+        const [staffRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status) VALUES (?, ?, ?, ?, ?, ?)", ['staff1@bookingx.com', hashedPw, 'Thị Tuyết', 'Nguyễn', 'EMPLOYEE', 'ACTIVE']);
         await connection.query("INSERT INTO employees (user_id, position, department) VALUES (?, ?, ?)", [staffRes.insertId, 'Lễ tân trưởng', 'Tiền sảnh']);
 
         // Customer
-        const [cusRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status, phone) VALUES (?, ?, ?, ?, ?, ?, ?)", ['customer@gmail.com', hashedPw, 'Thành Công', 'Trần', 'CUSTOMER', 'ACTIVE', '0905123456']);
+        const [cusRes] = await connection.query("INSERT INTO users (email, password, first_name, last_name, role, status, phone) VALUES (?, ?, ?, ?, ?, ?, ?)", ['customer1@bookingx.com', hashedPw, 'Thành Công', 'Trần', 'CUSTOMER', 'ACTIVE', '0905123456']);
         await connection.query("INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)", [cusRes.insertId, 'Hải Châu, Đà Nẵng', 'Đà Nẵng', 'Vietnam', 'ID999999']);
 
         // 3. Tạo Tiện nghi (Amenities)
@@ -429,28 +429,28 @@ export const seedData = async (req, res, next) => {
                 price: 800000, 
                 max: 2, 
                 desc: 'Phòng tiêu chuẩn với thiết kế cổ điển, đầy đủ tiện nghi cho khách du lịch cá nhân.',
-                imgs: ['https://images.unsplash.com/photo-1596394516093-501ba68a0ba6', 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511']
+                imgs: ['/images/img_078b9e82eb.jpg', '/images/img_078b9e82eb.jpg']
             },
             { 
                 name: 'Deluxe Ocean View', 
                 price: 1800000, 
                 max: 2, 
                 desc: 'Tầm nhìn panorama hướng biển, không gian sang trọng và lãng mạn.',
-                imgs: ['https://images.unsplash.com/photo-1566665797739-1674de7a421a', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b']
+                imgs: ['/images/img_76b5d3d850.jpg', '/images/img_2de9b7b582.jpg']
             },
             { 
                 name: 'Executive Family Suite', 
                 price: 3500000, 
                 max: 4, 
                 desc: 'Căn hộ thu nhỏ với 2 phòng ngủ, lý tưởng cho gia đình nghỉ dưỡng.',
-                imgs: ['https://images.unsplash.com/photo-1590490360182-c33d57733427', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461']
+                imgs: ['/images/img_bb9c76ea50.jpg', '/images/img_f2813391d9.jpg']
             },
             { 
                 name: 'Penthouse Presidential', 
                 price: 12000000, 
                 max: 6, 
                 desc: 'Đỉnh cao của sự xa hoa tại tầng thượng với hồ bơi riêng và quản gia 24/7.',
-                imgs: ['https://images.unsplash.com/photo-1542314831-068cd1dbfeeb', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d']
+                imgs: ['/images/img_edcdf83a2f.jpg', '/images/img_8ef95747bf.jpg']
             }
         ];
 
@@ -546,13 +546,18 @@ export const seedData = async (req, res, next) => {
 
         await connection.commit();
         res.json({ 
-            message: 'Đã nạp 100 phòng, 20 khách hàng và 60 đơn đặt phòng thành công!',
-            stats: 'Hệ thống đã sẵn sàng cho demo với dữ liệu thực tế 6 tháng qua.'
+            message: '🚀 Hệ thống BOOKING X đã được nạp dữ liệu thành công!',
+            accounts: {
+                admin: 'admin@bookingx.com / password123',
+                staff: 'staff1@bookingx.com / password123',
+                customer: 'customer1@bookingx.com / password123'
+            },
+            details: 'Đã tạo 100 phòng, 20 khách hàng và 60 đơn đặt phòng mẫu (6 tháng qua).'
         });
     } catch (error) {
         await connection.rollback();
         console.error('Seed error:', error);
-        next(error);
+        res.status(500).json({ message: 'Lỗi nạp dữ liệu: ' + error.message });
     } finally {
         connection.release();
     }

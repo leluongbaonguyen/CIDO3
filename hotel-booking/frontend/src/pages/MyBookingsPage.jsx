@@ -90,7 +90,7 @@ export default function MyBookingsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
              <div>
                 <h2 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--primary)', marginBottom: '10px' }}>Chuyến đi của bạn</h2>
-                <p style={{ color: 'var(--text-muted)' }}>Xem và quản lý các lịch trình nghỉ dưỡng tại XTRAVEL.</p>
+                <p style={{ color: 'var(--text-muted)' }}>Xem và quản lý các lịch trình nghỉ dưỡng tại BOOKING X.</p>
              </div>
 
              {bookings.length === 0 ? (

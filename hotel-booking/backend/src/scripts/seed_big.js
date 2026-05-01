@@ -3,124 +3,160 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
 import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 async function seed() {
-  const setupConn = await mysql.createConnection({
-    host: '127.0.0.1',
-    port: 3306,
-    user: 'root',
-    password: 'Nguyen@1904',
-    multipleStatements: true
-  });
-  
-  console.log('--- INITIALIZING DATABASE SCHEMA ---');
-  const schemaPath = path.join(__dirname, '../sql/schema.sql');
-  const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-  await setupConn.query(schemaSql);
-  await setupConn.end();
-
   const connection = await mysql.createConnection({
     host: '127.0.0.1',
     port: 3306,
     user: 'root',
     password: 'Nguyen@1904',
-    database: 'hotel_booking_db'
+    database: 'hotel_booking_db',
+    multipleStatements: true
   });
 
-  console.log('--- START SEEDING BIG DATA ---');
+  console.log('🚀 --- START ENHANCED SEEDING --- 🚀');
 
   try {
-    // 1. Clear existing data (Careful! This is for seeding fresh)
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    await connection.query('TRUNCATE TABLE booking_items');
-    await connection.query('TRUNCATE TABLE bookings');
-    await connection.query('TRUNCATE TABLE maintenance_records');
-    await connection.query('TRUNCATE TABLE rooms');
-    await connection.query('TRUNCATE TABLE room_types');
-    await connection.query('TRUNCATE TABLE customers');
-    await connection.query('TRUNCATE TABLE employees');
-    await connection.query('TRUNCATE TABLE users');
+    
+    // Adjust schema for luxury prices
+    await connection.query("ALTER TABLE bookings MODIFY total_amount DECIMAL(15,2)");
+    await connection.query("ALTER TABLE booking_items MODIFY price DECIMAL(15,2)");
+    await connection.query("ALTER TABLE payments MODIFY amount DECIMAL(15,2)");
+    await connection.query("ALTER TABLE room_types MODIFY base_price DECIMAL(15,2)");
+
+    const tables = ['payments', 'booking_items', 'bookings', 'maintenance_records', 'rooms', 'room_type_amenities', 'amenities', 'room_types', 'customers', 'employees', 'users'];
+    for (const table of tables) await connection.query(`TRUNCATE TABLE ${table}`);
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
 
     const hashedPassword = await bcrypt.hash('password123', 10);
 
+    // 1. Seed Amenities
+    console.log('Seeding Amenities...');
+    const amenityList = [
+      ['Wifi Siêu Tốc', 'High-speed Wifi', 'fa-wifi'],
+      ['Hồ bơi riêng', 'Private Pool', 'fa-swimming-pool'],
+      ['Ăn sáng Michelin', 'Michelin Breakfast', 'fa-utensils'],
+      ['Phòng Gym 24/7', 'Pro Fitness Gym', 'fa-dumbbell'],
+      ['Spa Trị Liệu', 'Luxury Spa & Wellness', 'fa-spa'],
+      ['Mini Bar Cao Cấp', 'Premium Mini Bar', 'fa-cocktail'],
+      ['View Biển Panorama', 'Ocean View', 'fa-mountain'],
+      ['Bồn tắm Jacuzzi', 'Jacuzzi Bath', 'fa-bath'],
+      ['Dịch vụ Quản gia', 'Personal Butler', 'fa-concierge-bell']
+    ];
+    const amenityIds = [];
+    for (const [name, desc, icon] of amenityList) {
+      const [res] = await connection.query("INSERT INTO amenities (name, description, icon) VALUES (?, ?, ?)", [name, desc, icon]);
+      amenityIds.push(res.insertId);
+    }
+
     // 2. Seed Room Types
     console.log('Seeding Room Types...');
-    const roomTypes = [
-      ['Standard Room', 'Phòng tiêu chuẩn tiện nghi, tối ưu cho khách công tác.', 850000, 2, 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'],
-      ['Deluxe Ocean View', 'Tầm nhìn tuyệt đẹp ra biển Mỹ Khê, ban công rộng rãi.', 1800000, 2, 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800'],
-      ['Executive Suite', 'Không gian sang trọng với phòng khách riêng biệt.', 3500000, 3, 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800'],
-      ['Family Villa', 'Villa nguyên căn với hồ bơi riêng, phù hợp cho cả gia đình.', 7500000, 6, 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800'],
-      ['Presidential Penthouse', 'Đỉnh cao của sự xa hoa, tọa lạc tại tầng cao nhất.', 15000000, 4, 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800']
+    const roomTypesData = [
+      ['Standard Heritage', 'Phòng tiêu chuẩn với thiết kế cổ điển, đầy đủ tiện nghi.', 850000, 2, '/images/img_76b5d3d850.jpg'],
+      ['Deluxe Ocean View', 'Tầm nhìn tuyệt đẹp ra biển Mỹ Khê, ban công rộng rãi.', 1800000, 2, '/images/img_2de9b7b582.jpg'],
+      ['Executive Suite', 'Không gian sang trọng với phòng khách riêng biệt.', 3500000, 3, '/images/img_bb9c76ea50.jpg'],
+      ['Family Luxury Villa', 'Villa nguyên căn với hồ bơi riêng, phù hợp cho gia đình.', 8500000, 6, '/images/img_01433d0418.jpg'],
+      ['Presidential Penthouse', 'Đỉnh cao của sự xa hoa tại tầng cao nhất.', 25000000, 4, '/images/img_edcdf83a2f.jpg']
     ];
 
     const typeIds = [];
-    for (const type of roomTypes) {
+    for (const type of roomTypesData) {
       const [result] = await connection.query(
         'INSERT INTO room_types (name, description, base_price, max_occupancy, photo_urls) VALUES (?, ?, ?, ?, ?)',
         type
       );
-      typeIds.push(result.insertId);
+      const typeId = result.insertId;
+      typeIds.push(typeId);
+
+      // Map random amenities to room types
+      const randomAmenities = amenityIds.sort(() => 0.5 - Math.random()).slice(0, 5);
+      for (const aId of randomAmenities) {
+        await connection.query("INSERT INTO room_type_amenities (room_type_id, amenity_id) VALUES (?, ?)", [typeId, aId]);
+      }
     }
 
-    // 3. Seed 200 Rooms
-    console.log('Seeding 200 Rooms...');
-    const roomEntries = [];
-    for (let i = 1; i <= 200; i++) {
-      const floor = Math.floor((i - 1) / 20) + 1;
-      const roomNum = floor * 100 + (i % 20 === 0 ? 20 : i % 20);
-      const typeId = typeIds[Math.floor(Math.random() * typeIds.length)];
-      roomEntries.push([roomNum.toString(), floor, 'AVAILABLE', '', typeId]);
-    }
-    await connection.query(
-      'INSERT INTO rooms (room_number, floor, status, notes, room_type_id) VALUES ?',
-      [roomEntries]
-    );
-
-    // 4. Seed 100 Customers
-    console.log('Seeding 100 Customers...');
+    // 3. Seed 100 Rooms
+    console.log('Seeding 100 Rooms...');
+    const roomIds = [];
     for (let i = 1; i <= 100; i++) {
+      const floor = Math.floor((i - 1) / 10) + 1;
+      const roomNum = floor * 100 + (i % 10 === 0 ? 10 : i % 10);
+      const typeId = typeIds[Math.floor((i - 1) / 20)]; // Grouped by type
+      const [res] = await connection.query(
+        'INSERT INTO rooms (room_number, floor, status, notes, room_type_id) VALUES (?, ?, ?, ?, ?)',
+        [roomNum.toString(), floor, 'AVAILABLE', 'Cleaned and ready', typeId]
+      );
+      roomIds.push({ id: res.insertId, typeId, price: roomTypesData[Math.floor((i - 1) / 20)][2] });
+    }
+
+    // 4. Seed Users & Customers
+    console.log('Seeding Users & Customers...');
+    const customerIds = [];
+    for (let i = 1; i <= 50; i++) {
       const [userResult] = await connection.query(
         'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)',
-        [`customer${i}@example.com`, hashedPassword, `Customer`, `Name ${i}`, `090${1000000 + i}`, 'CUSTOMER']
+        [`customer${i}@bookingx.com`, hashedPassword, `Customer`, `${i}`, `090${1000000 + i}`, 'CUSTOMER']
       );
       const userId = userResult.insertId;
-      await connection.query(
+      const [cusResult] = await connection.query(
         'INSERT INTO customers (user_id, address, city, country, id_number) VALUES (?, ?, ?, ?, ?)',
-        [userId, `${i} Le Loi St`, 'Da Nang', 'Vietnam', `ID${2000000 + i}`]
+        [userId, `${i} Luxury Ave`, 'Da Nang', 'Vietnam', `ID${2000000 + i}`]
       );
+      customerIds.push(cusResult.insertId);
     }
 
-    // 5. Seed 20 Employees
-    console.log('Seeding 20 Employees...');
-    const depts = ['Reception', 'Accounting', 'Management', 'Other'];
-    for (let i = 1; i <= 20; i++) {
-      const [userResult] = await connection.query(
-        'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)',
-        [`staff${i}@example.com`, hashedPassword, `Staff`, `Member ${i}`, `080${1000000 + i}`, 'EMPLOYEE']
-      );
-      const userId = userResult.insertId;
-      await connection.query(
-        'INSERT INTO employees (user_id, position, department, hire_date) VALUES (?, ?, ?, ?)',
-        [userId, 'Staff', depts[i % 4], new Date()]
-      );
-    }
-
-    // 6. Seed 1 Admin
-    console.log('Seeding Admin...');
+    // 5. Seed Admin & Staff
+    console.log('Seeding Staff...');
     await connection.query(
       'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)',
-      ['admin@xtravel.com', hashedPassword, 'Admin', 'XTravel', '000000000', 'ADMIN']
+      ['admin@bookingx.com', hashedPassword, 'Admin', 'BookingX', '000000000', 'ADMIN']
+    );
+    await connection.query(
+      'INSERT INTO users (email, password, first_name, last_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)',
+      ['staff1@bookingx.com', hashedPassword, 'Staff', 'One', '011111111', 'EMPLOYEE']
     );
 
-    console.log('--- SEEDING COMPLETED SUCCESSFULLY ---');
+    // 6. Seed 150 Historical Bookings (Last 6 Months)
+    console.log('Seeding 150 Historical Bookings...');
+    for (let i = 1; i <= 150; i++) {
+      const customerId = customerIds[Math.floor(Math.random() * customerIds.length)];
+      const room = roomIds[Math.floor(Math.random() * roomIds.length)];
+      
+      const dateOffset = Math.floor(Math.random() * 180) - 170; // From 170 days ago
+      const checkin = new Date();
+      checkin.setDate(checkin.getDate() + dateOffset);
+      const checkout = new Date(checkin);
+      checkout.setDate(checkout.getDate() + Math.floor(Math.random() * 4) + 1);
+
+      const status = dateOffset < 0 ? 'COMPLETED' : 'CONFIRMED';
+      const totalAmount = room.price * Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+
+      const [bRes] = await connection.query(
+        "INSERT INTO bookings (customer_id, checkin_date, checkout_date, total_amount, status, create_date, booking_date, total_guests) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [customerId, checkin, checkout, totalAmount, status, checkin, checkin, 2]
+      );
+
+      await connection.query(
+        "INSERT INTO booking_items (booking_id, room_id, price, quantity) VALUES (?, ?, ?, ?)",
+        [bRes.insertId, room.id, room.price, 1]
+      );
+
+      if (status === 'COMPLETED') {
+        await connection.query(
+          "INSERT INTO payments (booking_id, amount, payment_method, status, payment_date, transaction_id) VALUES (?, ?, ?, ?, ?, ?)",
+          [bRes.insertId, totalAmount, 'VNPAY', 'SUCCESS', checkin, `TXN-SEED-${i}-${Date.now()}`]
+        );
+      }
+    }
+
+    console.log('✅ --- ENHANCED SEEDING COMPLETED --- ✅');
   } catch (err) {
-    console.error('Error seeding data:', err);
+    console.error('❌ Error seeding data:', err);
   } finally {
     await connection.end();
   }

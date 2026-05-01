@@ -15,91 +15,164 @@ export default function HomePage() {
       }}>
         <div style={{ 
           position: 'absolute', inset: 0, 
-          backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80")',
+          backgroundImage: 'url("/images/rooms/ocean-view.jpg")',
           backgroundSize: 'cover', backgroundPosition: 'center',
-          transform: 'scale(1.1)',
-          animation: 'fadeInScale 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards'
+          animation: 'zoomIn 20s infinite alternate linear'
         }}>
-           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,15,29,0.3) 0%, rgba(10,15,29,0.8) 100%)' }}></div>
+           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,15,29,0.3) 0%, rgba(10,15,29,0.9) 100%)' }}></div>
         </div>
 
-        <div className="animate-fade-up" style={{ position: 'relative', zIndex: 10, textAlign: 'center', color: '#fff', maxWidth: '1000px', padding: '0 25px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '24px' }}>
-             <div style={{ width: '40px', height: '1px', background: 'var(--gold)' }}></div>
-             <span style={{ color: 'var(--gold)', letterSpacing: '6px', fontWeight: '800', fontSize: '13px', textTransform: 'uppercase' }}>Established 1994 • Da Nang</span>
-             <div style={{ width: '40px', height: '1px', background: 'var(--gold)' }}></div>
+        <div className="animate-fade-in" style={{ position: 'relative', zIndex: 10, textAlign: 'center', color: '#fff', maxWidth: '1100px', padding: '0 25px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
+             <div style={{ width: '50px', height: '1.5px', background: 'var(--gold)' }}></div>
+             <span style={{ color: 'var(--gold)', letterSpacing: '8px', fontWeight: '900', fontSize: '14px', textTransform: 'uppercase' }}>Royal Heritage • Da Nang</span>
+             <div style={{ width: '50px', height: '1.5px', background: 'var(--gold)' }}></div>
           </div>
-          <h1 className="serif" style={{ fontSize: '90px', fontWeight: '900', marginBottom: '24px', lineHeight: '1', letterSpacing: '-2px' }}>Define Your<br /><i className="text-gold-gradient" style={{ fontWeight: '400' }}>Luxury</i> Legacy</h1>
-          <p style={{ fontSize: '20px', color: 'rgba(255,255,255,0.7)', marginBottom: '60px', maxWidth: '650px', margin: '0 auto 60px', lineHeight: '1.6', fontWeight: '500' }}>
-            Nơi tinh hoa kiến trúc hội tụ cùng dịch vụ đẳng cấp 5 sao quốc tế, mang đến hành trình nghỉ dưỡng mang đậm dấu ấn cá nhân.
+          <h1 className="serif" style={{ fontSize: '110px', fontWeight: '900', marginBottom: '30px', lineHeight: '0.9', letterSpacing: '-4px' }}>
+            Elevate Your<br />
+            <span className="text-gold" style={{ fontStyle: 'italic', fontWeight: '400' }}>Existence</span>
+          </h1>
+          <p style={{ fontSize: '22px', color: 'rgba(255,255,255,0.7)', marginBottom: '70px', maxWidth: '700px', margin: '0 auto 70px', lineHeight: '1.6', fontWeight: '500' }}>
+            Khám phá tinh hoa nghỉ dưỡng tại thiên đường ven biển Đà Nẵng, nơi mỗi khoảnh khắc đều trở thành kiệt tác nghệ thuật.
           </p>
           
           <BookingBar />
         </div>
+
+        <div style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', color: '#fff' }}>
+            <p style={{ fontSize: '12px', letterSpacing: '4px', opacity: 0.5, marginBottom: '10px', textTransform: 'uppercase' }}>Scroll to Explore</p>
+            <div style={{ width: '1px', height: '60px', background: 'var(--gold)', margin: '0 auto' }}></div>
+        </div>
       </section>
 
-      {/* ... (Các section khác giữ nguyên) ... */}
-      <section style={{ padding: '120px 0', background: '#fcfcfc' }}>
+      {/* 2. ABOUT / DISCOVER SECTION */}
+      <section style={{ padding: '160px 0', background: '#fff' }}>
          <div className="container">
-            <div className="section-title">
-               <h2 className="serif">Signature Accommodations</h2>
-               <div className="divider"></div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+               <div className="animate-fade-in">
+                  <h3 style={{ color: 'var(--gold)', letterSpacing: '4px', fontSize: '14px', fontWeight: '900', marginBottom: '20px', textTransform: 'uppercase' }}>The Art of Living</h3>
+                  <h2 className="serif" style={{ fontSize: '56px', fontWeight: '900', color: 'var(--primary)', marginBottom: '30px', lineHeight: '1.1' }}>
+                    Nơi di sản gặp gỡ<br />tương lai.
+                  </h2>
+                  <p style={{ fontSize: '18px', color: '#64748b', marginBottom: '40px', lineHeight: '1.8' }}>
+                    Với hơn 30 năm kinh nghiệm trong ngành khách sạn cao cấp, BOOKING X không chỉ mang đến một nơi nghỉ ngơi, mà là một biểu tượng của sự sang trọng và lòng hiếu khách chân thành.
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '50px' }}>
+                     <div>
+                        <h4 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)' }}>150+</h4>
+                        <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '700' }}>Phòng nghỉ cao cấp</p>
+                     </div>
+                     <div>
+                        <h4 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--gold)' }}>5 ★</h4>
+                        <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '700' }}>Dịch vụ tiêu chuẩn</p>
+                     </div>
+                  </div>
+                  <Link to="/about" className="btn-gold">Xem thêm về chúng tôi</Link>
+               </div>
+               <div style={{ position: 'relative' }}>
+                  <img src="/images/rooms/pool-view.jpg" style={{ width: '100%', borderRadius: '40px', boxShadow: '0 40px 100px rgba(0,0,0,0.1)' }} alt="Hotel" />
+                  <div style={{ 
+                    position: 'absolute', bottom: '-40px', left: '-40px', padding: '40px', background: 'var(--gold)', color: '#fff', 
+                    borderRadius: '30px', width: '280px', boxShadow: '0 20px 40px rgba(212,175,55,0.3)' 
+                  }}>
+                     <p style={{ fontSize: '40px', fontWeight: '900', lineHeight: '1' }}>30Y</p>
+                     <p style={{ fontSize: '14px', fontWeight: '700', marginTop: '10px' }}>Experience in Hospitality</p>
+                  </div>
+               </div>
             </div>
+         </div>
+      </section>
+
+      {/* 3. SIGNATURE ROOMS */}
+      <section style={{ padding: '120px 0', background: '#f8fafc' }}>
+         <div className="container">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '80px' }}>
+               <div>
+                  <h2 className="serif" style={{ fontSize: '56px', fontWeight: '900', color: 'var(--primary)' }}>Signature Suites</h2>
+                  <p style={{ color: '#64748b', marginTop: '15px', fontSize: '18px' }}>Trải nghiệm sự khác biệt trong từng chi tiết thiết kế.</p>
+               </div>
+               <Link to="/rooms" style={{ color: 'var(--gold)', fontWeight: '800', fontSize: '16px', textDecoration: 'none' }}>XEM TẤT CẢ PHÒNG <i className="fas fa-arrow-right"></i></Link>
+            </div>
+            
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px' }}>
-               <RoomCard title="Deluxe Ocean View" price="1,800,000" img="https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=800" />
-               <RoomCard title="Executive River Suite" price="3,500,000" img="https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=800" />
-               <RoomCard title="Presidential Penthouse" price="12,000,000" img="https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=800" />
+               <RoomCard title="Superior City View" price="1.200.000" img="/images/rooms/std-1.jpg" tag="Popular" />
+               <RoomCard title="Deluxe Ocean Front" price="2.500.000" img="/images/rooms/deluxe-1.jpg" tag="Luxury" />
+               <RoomCard title="Royal Penthouse" price="15.000.000" img="/images/rooms/penthouse-1.jpg" tag="Executive" />
             </div>
          </div>
       </section>
 
-      <section style={{ padding: '120px 0', background: '#0a0f1d', color: '#fff' }}>
+      {/* 4. SERVICES GRID */}
+      <section style={{ padding: '160px 0', background: 'var(--primary)', color: '#fff' }}>
          <div className="container">
-            <div className="section-title">
-               <h2 className="serif" style={{ color: 'var(--gold)' }}>World-Class Services</h2>
-               <p style={{ opacity: 0.6, marginTop: '10px' }}>Dịch vụ hoàn hảo cho mọi khoảnh khắc lưu trú.</p>
+            <div style={{ textAlign: 'center', marginBottom: '100px' }}>
+               <h2 className="serif" style={{ fontSize: '56px', fontWeight: '900', color: 'var(--gold)' }}>Immersive Experiences</h2>
+               <p style={{ opacity: 0.6, marginTop: '20px', fontSize: '18px' }}>Chúng tôi chăm sóc mọi nhu cầu của bạn với sự tỉ mỉ tuyệt đối.</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '25px' }}>
-               <ServiceItem icon="fa-spa" title="Luxury Spa" desc="Liệu pháp thư giãn đỉnh cao." />
-               <ServiceItem icon="fa-utensils" title="Fine Dining" desc="Ẩm thực chuẩn Michelin." />
-               <ServiceItem icon="fa-swimming-pool" title="Infinity Pool" desc="Tầm nhìn vô cực ra biển." />
-               <ServiceItem icon="fa-dumbbell" title="Pro Fitness" desc="Thiết bị hiện đại 24/7." />
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '30px' }}>
+               <ServiceItem icon="fa-spa" title="Sense Spa" desc="Tái tạo năng lượng với các liệu pháp thiên nhiên." />
+               <ServiceItem icon="fa-utensils" title="Michelin Dining" desc="Hành trình ẩm thực xuyên lục địa." />
+               <ServiceItem icon="fa-water" title="Private Beach" desc="Bãi biển riêng tư tuyệt đẹp tại Đà Nẵng." />
+               <ServiceItem icon="fa-concierge-bell" title="24/7 Butler" desc="Dịch vụ quản gia riêng biệt cho từng phòng." />
             </div>
          </div>
       </section>
+
+      <style>{`
+        @keyframes zoomIn {
+          from { transform: scale(1); }
+          to { transform: scale(1.1); }
+        }
+      `}</style>
     </div>
   );
 }
 
-function RoomCard({ title, price, img }) {
+function RoomCard({ title, price, img, tag }) {
   return (
-    <div className="card-luxury">
-       <div className="img-zoom-container" style={{ height: '350px' }}>
-          <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={title} />
-          <div className="img-overlay"></div>
-          <div style={{ position: 'absolute', top: '20px', right: '20px', padding: '8px 15px', background: 'var(--gold)', color: '#fff', borderRadius: '50px', fontSize: '11px', fontWeight: '800' }}>BEST SELLER</div>
-       </div>
-       <div style={{ padding: '35px', textAlign: 'center' }}>
-          <h3 style={{ fontSize: '24px', fontWeight: '900', marginBottom: '12px', letterSpacing: '-0.5px' }} className="serif">{title}</h3>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '25px' }}>
-             <div style={{ height: '1px', flex: 1, background: '#eee' }}></div>
-             <p style={{ color: 'var(--gold)', fontWeight: '800', fontSize: '20px' }}>{price} <span style={{ fontSize: '12px', opacity: 0.6 }}>VNĐ / ĐÊM</span></p>
-             <div style={{ height: '1px', flex: 1, background: '#eee' }}></div>
+    <div className="card-luxury animate-fade-in" style={{ cursor: 'pointer' }}>
+       <div style={{ height: '400px', overflow: 'hidden', position: 'relative' }}>
+          <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: '1s' }} className="zoom-hover" alt={title} />
+          <div style={{ position: 'absolute', top: '25px', left: '25px', padding: '8px 20px', background: 'var(--gold)', color: '#fff', borderRadius: '50px', fontSize: '11px', fontWeight: '900', letterSpacing: '1px' }}>{tag.toUpperCase()}</div>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.8) 0%, transparent 60%)' }}></div>
+          <div style={{ position: 'absolute', bottom: '30px', left: '30px', color: '#fff' }}>
+             <p style={{ fontSize: '13px', fontWeight: '700', opacity: 0.8, marginBottom: '5px' }}>Bắt đầu từ</p>
+             <p style={{ fontSize: '24px', fontWeight: '900' }}>{price}đ <span style={{ fontSize: '14px', fontWeight: '400' }}>/ đêm</span></p>
           </div>
-          <Link to="/rooms" className="btn-gold" style={{ width: '100%', fontSize: '12px' }}>CHI TIẾT PHÒNG</Link>
        </div>
+       <div style={{ padding: '35px' }}>
+          <h3 className="serif" style={{ fontSize: '26px', fontWeight: '900', marginBottom: '25px', color: 'var(--primary)' }}>{title}</h3>
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '35px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px', fontWeight: '700' }}><i className="fas fa-expand"></i> 45m²</div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px', fontWeight: '700' }}><i className="fas fa-bed"></i> King Bed</div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px', fontWeight: '700' }}><i className="fas fa-wifi"></i> Free Wifi</div>
+          </div>
+          <Link to="/rooms" className="btn-gold shine-effect" style={{ width: '100%', justifyContent: 'center' }}>ĐẶT PHÒNG NGAY</Link>
+       </div>
+       <style>{`
+          .zoom-hover:hover { transform: scale(1.1); }
+       `}</style>
     </div>
   );
 }
 
 function ServiceItem({ icon, title, desc }) {
   return (
-    <div className="glow-hover" style={{ padding: '40px', background: '#161c2d', borderRadius: '20px', textAlign: 'center', transition: '0.4s' }}>
-       <i className={`fas ${icon}`} style={{ fontSize: '36px', color: 'var(--gold)', marginBottom: '20px' }}></i>
-       <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '10px' }}>{title}</h4>
-       <p style={{ fontSize: '13px', opacity: 0.6 }}>{desc}</p>
+    <div style={{ padding: '50px 30px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '30px', textAlign: 'center', transition: '0.4s' }} className="service-card">
+       <div style={{ 
+            width: '80px', height: '80px', borderRadius: '24px', background: 'rgba(212,175,55,0.1)', 
+            color: 'var(--gold)', display: 'flex', justifyContent: 'center', alignItems: 'center', 
+            fontSize: '32px', margin: '0 auto 30px', transition: '0.4s' 
+        }} className="icon-box">
+            <i className={`fas ${icon}`}></i>
+       </div>
+       <h4 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '15px' }}>{title}</h4>
+       <p style={{ fontSize: '14px', opacity: 0.6, lineHeight: '1.6' }}>{desc}</p>
+       <style>{`
+          .service-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-10px); border-color: var(--gold); }
+          .service-card:hover .icon-box { background: var(--gold); color: #fff; transform: rotate(10deg); }
+       `}</style>
     </div>
   );
 }
-
-// ... (Các section khác giữ nguyên) ...

@@ -72,6 +72,27 @@ export default function AdminRoomTypesPage() {
     }
   };
 
+  const getDisplayImage = (photoUrls) => {
+    if (!photoUrls || photoUrls === 'null' || photoUrls === 'undefined') return '/images/rooms/std-1.jpg';
+    try {
+      const urls = typeof photoUrls === 'string' && (photoUrls.startsWith('[') || photoUrls.startsWith('{')) 
+        ? JSON.parse(photoUrls) 
+        : photoUrls;
+        
+      if (Array.isArray(urls) && urls.length > 0) return urls[0];
+      if (typeof urls === 'string') {
+        const cleaned = urls.replace(/[\[\]"]/g, '').split(',')[0].trim();
+        return cleaned || '/images/rooms/std-1.jpg';
+      }
+      return '/images/rooms/std-1.jpg';
+    } catch (e) {
+      if (typeof photoUrls === 'string') {
+        return photoUrls.split(',')[0].replace(/[\[\]"]/g, '').trim() || '/images/rooms/std-1.jpg';
+      }
+      return '/images/rooms/std-1.jpg';
+    }
+  };
+
   return (
     <div style={{ animation: 'fadeInUp 0.6s ease-out' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
@@ -88,7 +109,7 @@ export default function AdminRoomTypesPage() {
         {types.map((type) => (
           <div key={type.id} className="card-luxury-premium" style={{ display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: '24px', overflow: 'hidden', boxShadow: 'var(--shadow-premium)', border: '1px solid #f1f5f9' }}>
             <div style={{ height: '200px', position: 'relative' }}>
-               <img src={type.photo_urls?.split(',')[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={type.name} />
+               <img src={getDisplayImage(type.photo_urls)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={type.name} />
                <div style={{ position: 'absolute', bottom: '20px', left: '20px', padding: '6px 15px', background: 'var(--gold-gradient)', color: 'var(--black)', borderRadius: '50px', fontSize: '11px', fontWeight: '800' }}>
                   {Number(type.base_price).toLocaleString()}đ / ĐÊM
                </div>

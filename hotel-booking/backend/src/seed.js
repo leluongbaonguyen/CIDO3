@@ -67,10 +67,10 @@ const seed = async () => {
     // 4. Loại phòng (Room Types)
     console.log('--- Đang tạo loại phòng...');
     const types = [
-        { id: 1, name: 'Standard Room', price: 500000, max: 2, img: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6' },
-        { id: 2, name: 'Deluxe Room', price: 1200000, max: 2, img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a' },
-        { id: 3, name: 'Family Suite', price: 2500000, max: 4, img: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b' },
-        { id: 4, name: 'Penthouse', price: 8000000, max: 6, img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461' }
+        { id: 1, name: 'Standard Room', price: 500000, max: 2, img: '/images/img_078b9e82eb.jpg' },
+        { id: 2, name: 'Deluxe Room', price: 1200000, max: 2, img: '/images/img_76b5d3d850.jpg' },
+        { id: 3, name: 'Family Suite', price: 2500000, max: 4, img: '/images/img_2de9b7b582.jpg' },
+        { id: 4, name: 'Penthouse', price: 8000000, max: 6, img: '/images/img_f2813391d9.jpg' }
     ];
 
     for (const t of types) {

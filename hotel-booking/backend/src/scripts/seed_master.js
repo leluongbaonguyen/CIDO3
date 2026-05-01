@@ -103,10 +103,10 @@ async function seedMaster() {
         // 6. Room Types
         console.log('Seeding Room Types...');
         const typeData = [
-            ['Deluxe Collection', 1800000, 2, 'Heritage view, cozy design', 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6'],
-            ['Executive Suite', 3500000, 4, 'Panoramic sea view, private balcony', 'https://images.unsplash.com/photo-1566665797739-1674de7a421a'],
-            ['Penthouse', 12000000, 6, 'Private pool, butler service', 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb'],
-            ['Family Villa', 8500000, 8, 'Spacious villa for large families', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b']
+            ['Deluxe Collection', 1800000, 2, 'Heritage view, cozy design', '/images/img_078b9e82eb.jpg'],
+            ['Executive Suite', 3500000, 4, 'Panoramic sea view, private balcony', '/images/img_76b5d3d850.jpg'],
+            ['Penthouse', 12000000, 6, 'Private pool, butler service', '/images/img_edcdf83a2f.jpg'],
+            ['Family Villa', 8500000, 8, 'Spacious villa for large families', '/images/img_2de9b7b582.jpg']
         ];
         const typeIds = [];
         for (const [name, price, max, desc, img] of typeData) {

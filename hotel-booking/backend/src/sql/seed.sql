@@ -2,9 +2,9 @@ USE hotel_booking_db;
 
 INSERT INTO room_types (name, description, base_price, max_occupancy, photo_urls)
 VALUES
-('Standard', 'Phòng tiêu chuẩn, phù hợp 2 khách', 500000, 2, 'https://images.unsplash.com/photo-1566665797739-1674de7a421a'),
-('Deluxe', 'Phòng cao cấp, có ban công', 900000, 3, 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85'),
-('Suite', 'Phòng suite rộng rãi, view đẹp', 1500000, 4, 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461');
+('Standard', 'Phòng tiêu chuẩn, phù hợp 2 khách', 500000, 2, '/images/img_76b5d3d850.jpg'),
+('Deluxe', 'Phòng cao cấp, có ban công', 900000, 3, '/images/img_8e148fc578.jpg'),
+('Suite', 'Phòng suite rộng rãi, view đẹp', 1500000, 4, '/images/img_f2813391d9.jpg');
 
 INSERT INTO rooms (room_number, floor, status, notes, room_type_id)
 VALUES

@@ -6,7 +6,7 @@ export default function AboutPage() {
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
         
         <div style={{ textAlign: 'center', marginBottom: '80px' }} className="animate-up">
-           <h1 style={{ fontSize: '48px', fontWeight: '900', color: '#0a0f1d', fontFamily: '"Playfair Display", serif', marginBottom: '20px' }}>Về XTRAVEL Đà Nẵng</h1>
+           <h1 style={{ fontSize: '48px', fontWeight: '900', color: '#0a0f1d', fontFamily: '"Playfair Display", serif', marginBottom: '20px' }}>Về BOOKING X Đà Nẵng</h1>
            <div style={{ width: '60px', height: '4px', background: '#0070f3', margin: '0 auto' }}></div>
         </div>
 
@@ -14,14 +14,14 @@ export default function AboutPage() {
            <div>
               <h2 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '25px', color: '#1a1a1a' }}>Sứ Mệnh Của Chúng Tôi</h2>
               <p style={{ color: '#666', lineHeight: '2', fontSize: '17px', marginBottom: '20px' }}>
-                XTRAVEL không chỉ là một resort, đó là nơi những giấc mơ nghỉ dưỡng trở thành hiện thực. Tọa lạc tại bãi biển Mỹ Khê quyến rũ nhất hành tinh, chúng tôi cam kết mang đến trải nghiệm lưu trú tinh tế nhất.
+                BOOKING X không chỉ là một resort, đó là nơi những giấc mơ nghỉ dưỡng trở thành hiện thực. Tọa lạc tại bãi biển Mỹ Khê quyến rũ nhất hành tinh, chúng tôi cam kết mang đến trải nghiệm lưu trú tinh tế nhất.
               </p>
               <p style={{ color: '#666', lineHeight: '2', fontSize: '17px' }}>
-                Với 100 phòng nghỉ được thiết kế tỉ mỉ và đội ngũ nhân viên tận tâm, XTRAVEL tự hào là điểm dừng chân lý tưởng cho mọi hành trình tại Đà Nẵng.
+                Với 100 phòng nghỉ được thiết kế tỉ mỉ và đội ngũ nhân viên tận tâm, BOOKING X tự hào là điểm dừng chân lý tưởng cho mọi hành trình tại Đà Nẵng.
               </p>
            </div>
            <div style={{ borderRadius: '30px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
-              <img src="https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=800" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="About XTRAVEL" />
+              <img src="/images/img_d31fdb5400.jpeg" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="About BOOKING X" />
            </div>
         </div>
 

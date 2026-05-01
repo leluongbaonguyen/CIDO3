@@ -147,7 +147,7 @@ export default function AdminRoomsPage() {
                 <td>Tầng {room.floor}</td>
                 <td>
                    <div style={{ fontWeight: '700', color: 'var(--primary)' }}>{room.room_type_name}</div>
-                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>XTRAVEL Original</div>
+                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>BOOKING X Original</div>
                 </td>
                 <td style={{ fontWeight: '700' }}>{Number(room.base_price).toLocaleString()}đ</td>
                 <td>
@@ -174,35 +174,51 @@ export default function AdminRoomsPage() {
       </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.3s' }}>
-          <form onSubmit={handleSubmit} style={{ backgroundColor: '#fff', width: '500px', borderRadius: '24px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--primary)', marginBottom: '32px' }}>{editingRoom ? 'Hiệu chỉnh thông tin' : 'Thiết lập phòng mới'}</h3>
-            <div style={{ display: 'grid', gap: '24px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,15,29,0.85)', backdropFilter: 'blur(15px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.4s ease' }}>
+          <form onSubmit={handleSubmit} style={{ 
+            backgroundColor: '#0a0f1d', width: '550px', borderRadius: '32px', padding: '50px', 
+            border: '1px solid rgba(196, 166, 97, 0.2)',
+            boxShadow: '0 40px 100px rgba(0,0,0,0.6)',
+            position: 'relative', overflow: 'hidden'
+          }}>
+            {/* Decorative Gold Glow */}
+            <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '250px', height: '250px', background: 'radial-gradient(circle, rgba(196, 166, 97, 0.1) 0%, transparent 70%)' }}></div>
+            
+            <h3 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--gold)', marginBottom: '40px', fontFamily: '"Playfair Display", serif', letterSpacing: '1px' }}>
+               {editingRoom ? 'Hiệu chỉnh thông tin' : 'Thiết lập phòng mới'}
+            </h3>
+
+            <div style={{ display: 'grid', gap: '30px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
                    <div>
-                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Số phòng</label>
-                       <input required placeholder="101" value={formData.room_number} onChange={e => setFormData({...formData, room_number: e.target.value})} style={{ width: '100%' }} />
+                       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Số phòng</label>
+                       <input required placeholder="101" value={formData.room_number} onChange={e => setFormData({...formData, room_number: e.target.value})} 
+                         style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196, 166, 97, 0.3)', borderRadius: '12px', color: '#fff', padding: '15px' }} />
                    </div>
                    <div>
-                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Tầng</label>
-                       <input required type="number" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} style={{ width: '100%' }} />
+                       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Tầng</label>
+                       <input required type="number" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} 
+                         style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196, 166, 97, 0.3)', borderRadius: '12px', color: '#fff', padding: '15px' }} />
                    </div>
                 </div>
                 <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Hạng phòng</label>
-                    <select required value={formData.room_type_id} onChange={e => setFormData({...formData, room_type_id: e.target.value})} style={{ width: '100%' }}>
-                        <option value="">-- Chọn hạng phòng niêm yết --</option>
-                        {roomTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Hạng phòng</label>
+                    <select required value={formData.room_type_id} onChange={e => setFormData({...formData, room_type_id: e.target.value})} 
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196, 166, 97, 0.3)', borderRadius: '12px', color: '#fff', padding: '15px' }}>
+                        <option value="" style={{ background: '#0a0f1d' }}>-- Chọn hạng phòng niêm yết --</option>
+                        {roomTypes.map(t => <option key={t.id} value={t.id} style={{ background: '#0a0f1d' }}>{t.name}</option>)}
                     </select>
                 </div>
                 <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Ghi chú vận hành</label>
-                    <textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} style={{ width: '100%', height: '100px', padding: '12px', borderRadius: '12px', border: '2px solid #f1f5f9' }} />
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--gold)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '2px' }}>Ghi chú vận hành</label>
+                    <textarea value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} 
+                      style={{ width: '100%', height: '120px', padding: '15px', borderRadius: '12px', border: '1px solid rgba(196, 166, 97, 0.3)', background: 'rgba(255,255,255,0.03)', color: '#fff', resize: 'none' }} />
                 </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '40px' }}>
-              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '14px 28px', borderRadius: '12px', border: 'none', background: '#f1f5f9', fontWeight: '700', cursor: 'pointer' }}>ĐÓNG</button>
-              <button type="submit" className="btn-accent" style={{ padding: '14px 28px' }}>XÁC NHẬN LƯU</button>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '20px', marginTop: '50px' }}>
+              <button type="button" onClick={() => setShowModal(false)} style={{ padding: '16px 35px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontWeight: '700', cursor: 'pointer', fontSize: '13px', transition: '0.3s' }} onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.05)'} onMouseLeave={e => e.target.style.background = 'transparent'}>ĐÓNG</button>
+              <button type="submit" className="btn-gold" style={{ padding: '16px 40px', fontSize: '13px', borderRadius: '14px', boxShadow: '0 10px 25px rgba(196, 166, 97, 0.3)' }}>XÁC NHẬN LƯU</button>
             </div>
           </form>
         </div>
