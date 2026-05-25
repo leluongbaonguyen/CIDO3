@@ -1,0 +1,215 @@
+=== TABLES IN DATABASE ===
+
+Table: amenities
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - name: varchar(255) (Null: NO, Key: , Default: null)
+  - icon: varchar(100) (Null: YES, Key: , Default: null)
+  - description: text (Null: YES, Key: , Default: null)
+  - status: varchar(50) (Null: YES, Key: , Default: ACTIVE)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: audit_logs
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - user_id: int (Null: YES, Key: MUL, Default: null)
+  - action: varchar(255) (Null: NO, Key: , Default: null)
+  - entity: varchar(100) (Null: NO, Key: , Default: null)
+  - entity_id: varchar(50) (Null: YES, Key: , Default: null)
+  - old_value: json (Null: YES, Key: , Default: null)
+  - new_value: json (Null: YES, Key: , Default: null)
+  - ip_address: varchar(50) (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: booking_items
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - booking_id: int (Null: NO, Key: MUL, Default: null)
+  - room_id: int (Null: NO, Key: MUL, Default: null)
+  - price: decimal(15,2) (Null: YES, Key: , Default: null)
+  - quantity: int (Null: NO, Key: , Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+
+Table: bookings
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - booking_code: varchar(50) (Null: NO, Key: UNI, Default: null)
+  - customer_id: int (Null: NO, Key: MUL, Default: null)
+  - room_id: int (Null: NO, Key: MUL, Default: null)
+  - check_in_date: date (Null: NO, Key: , Default: null)
+  - check_out_date: date (Null: NO, Key: , Default: null)
+  - adults: int (Null: NO, Key: , Default: 1)
+  - children: int (Null: NO, Key: , Default: 0)
+  - total_guests: int (Null: NO, Key: , Default: 1)
+  - total_amount: decimal(15,2) (Null: NO, Key: , Default: 0.00)
+  - discount_code: varchar(50) (Null: YES, Key: , Default: null)
+  - status: enum('PENDING','CONFIRMED','CHECKED_IN','COMPLETED','CANCELLED','EXPIRED') (Null: NO, Key: , Default: PENDING)
+  - payment_method: enum('CASH','VNPAY') (Null: NO, Key: , Default: null)
+  - note: text (Null: YES, Key: , Default: null)
+  - expires_at: datetime (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - qr_token: varchar(255) (Null: YES, Key: UNI, Default: null)
+  - qr_image_url: varchar(255) (Null: YES, Key: , Default: null)
+  - voucher_pdf_url: varchar(255) (Null: YES, Key: , Default: null)
+  - voucher_sent: tinyint(1) (Null: YES, Key: , Default: 0)
+  - voucher_sent_at: timestamp (Null: YES, Key: , Default: null)
+  - email_status: enum('NOT_SENT','SENT','FAILED') (Null: YES, Key: , Default: NOT_SENT)
+  - email_error: text (Null: YES, Key: , Default: null)
+  - subtotal: decimal(15,2) (Null: YES, Key: , Default: 0.00)
+  - weekend_surcharge: decimal(15,2) (Null: YES, Key: , Default: 0.00)
+  - holiday_surcharge: decimal(15,2) (Null: YES, Key: , Default: 0.00)
+  - extra_occupant_surcharge: decimal(15,2) (Null: YES, Key: , Default: 0.00)
+  - discount_amount: decimal(15,2) (Null: YES, Key: , Default: 0.00)
+
+Table: chat_conversations
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - conversation_code: varchar(50) (Null: NO, Key: UNI, Default: null)
+  - customer_id: int (Null: YES, Key: MUL, Default: null)
+  - assigned_staff_id: int (Null: YES, Key: MUL, Default: null)
+  - status: enum('WAITING','PROCESSING','CUSTOMER_WAITING','RESPONDED','COMPLETED','CLOSED','TRANSFER_ADMIN') (Null: YES, Key: , Default: WAITING)
+  - priority: enum('LOW','MEDIUM','HIGH') (Null: YES, Key: , Default: MEDIUM)
+  - related_booking_id: int (Null: YES, Key: MUL, Default: null)
+  - subject: varchar(255) (Null: YES, Key: , Default: null)
+  - last_message: text (Null: YES, Key: , Default: null)
+  - last_message_at: timestamp (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - closed_at: timestamp (Null: YES, Key: , Default: null)
+
+Table: chat_messages
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - conversation_id: int (Null: NO, Key: MUL, Default: null)
+  - sender_id: int (Null: YES, Key: , Default: null)
+  - sender_role: enum('GUEST','CUSTOMER','STAFF','ADMIN') (Null: NO, Key: , Default: null)
+  - message_type: enum('TEXT','IMAGE','SYSTEM') (Null: YES, Key: , Default: TEXT)
+  - message_content: text (Null: NO, Key: , Default: null)
+  - attachment_url: varchar(255) (Null: YES, Key: , Default: null)
+  - is_read: tinyint(1) (Null: YES, Key: , Default: 0)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: customers
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - user_id: int (Null: NO, Key: UNI, Default: null)
+  - identity_number: varchar(50) (Null: YES, Key: UNI, Default: null)
+  - address: text (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: discounts
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - code: varchar(255) (Null: NO, Key: UNI, Default: null)
+  - description: varchar(255) (Null: YES, Key: , Default: null)
+  - percentage: decimal(5,2) (Null: NO, Key: , Default: null)
+  - valid_from: datetime(3) (Null: NO, Key: , Default: null)
+  - valid_to: datetime(3) (Null: NO, Key: , Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+
+Table: employee_roles
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - employee_id: int (Null: NO, Key: MUL, Default: null)
+  - role_id: int (Null: NO, Key: MUL, Default: null)
+
+Table: employees
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - user_id: int (Null: NO, Key: UNI, Default: null)
+  - position: varchar(100) (Null: YES, Key: , Default: null)
+  - salary: decimal(15,2) (Null: YES, Key: , Default: null)
+  - hire_date: date (Null: YES, Key: , Default: null)
+  - department: varchar(100) (Null: YES, Key: , Default: null)
+
+Table: maintenance_records
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - description: text (Null: NO, Key: , Default: null)
+  - start_date: datetime(3) (Null: NO, Key: , Default: null)
+  - end_date: datetime(3) (Null: NO, Key: , Default: null)
+  - status: enum('In_Progress','Completed','Cancelled') (Null: NO, Key: , Default: In_Progress)
+  - cost: decimal(10,2) (Null: NO, Key: , Default: 0.00)
+  - notes: text (Null: YES, Key: , Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - room_id: int (Null: NO, Key: MUL, Default: null)
+
+Table: payments
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - booking_id: int (Null: NO, Key: MUL, Default: null)
+  - amount: decimal(15,2) (Null: NO, Key: , Default: null)
+  - method: enum('CASH','VNPAY') (Null: NO, Key: , Default: null)
+  - status: enum('PENDING','SUCCESS','FAILED','REFUNDED') (Null: NO, Key: , Default: PENDING)
+  - transaction_code: varchar(255) (Null: YES, Key: , Default: null)
+  - paid_at: datetime (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: reviews
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - booking_id: int (Null: NO, Key: UNI, Default: null)
+  - customer_id: int (Null: NO, Key: MUL, Default: null)
+  - rating: int (Null: NO, Key: , Default: null)
+  - comment: text (Null: YES, Key: , Default: null)
+  - is_hidden: tinyint(1) (Null: YES, Key: , Default: 0)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: roles
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - name: varchar(255) (Null: NO, Key: UNI, Default: null)
+  - permissions: json (Null: YES, Key: , Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+
+Table: room_images
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - image_url: text (Null: NO, Key: , Default: null)
+  - room_id: int (Null: NO, Key: MUL, Default: null)
+
+Table: room_type_amenities
+  - room_type_id: int (Null: NO, Key: PRI, Default: null)
+  - amenity_id: int (Null: NO, Key: PRI, Default: null)
+
+Table: room_types
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - name: varchar(255) (Null: NO, Key: , Default: null)
+  - description: text (Null: YES, Key: , Default: null)
+  - base_price: decimal(15,2) (Null: NO, Key: , Default: 0.00)
+  - max_occupancy: int (Null: NO, Key: , Default: 1)
+  - photo_urls: json (Null: YES, Key: , Default: null)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: rooms
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - room_number: varchar(50) (Null: NO, Key: UNI, Default: null)
+  - floor: int (Null: YES, Key: , Default: null)
+  - room_type_id: int (Null: NO, Key: MUL, Default: null)
+  - status: enum('AVAILABLE','OCCUPIED','CLEANING','MAINTENANCE') (Null: NO, Key: , Default: AVAILABLE)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+
+Table: seasonal_rates
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - start_date: datetime(3) (Null: NO, Key: , Default: null)
+  - end_date: datetime(3) (Null: NO, Key: , Default: null)
+  - multiplier: decimal(5,2) (Null: NO, Key: , Default: null)
+  - season_name: varchar(255) (Null: NO, Key: , Default: null)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - room_type_id: int (Null: NO, Key: MUL, Default: null)
+
+Table: support_tickets
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - customer_id: int (Null: NO, Key: MUL, Default: null)
+  - subject: varchar(255) (Null: NO, Key: , Default: null)
+  - message: text (Null: NO, Key: , Default: null)
+  - status: enum('OPEN','PENDING','CLOSED') (Null: NO, Key: , Default: OPEN)
+  - create_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - update_date: datetime(3) (Null: NO, Key: , Default: CURRENT_TIMESTAMP(3))
+  - response: text (Null: YES, Key: , Default: null)
+
+Table: users
+  - id: int (Null: NO, Key: PRI, Default: null)
+  - email: varchar(255) (Null: NO, Key: UNI, Default: null)
+  - password_hash: varchar(255) (Null: NO, Key: , Default: null)
+  - full_name: varchar(255) (Null: NO, Key: , Default: null)
+  - phone: varchar(20) (Null: YES, Key: , Default: null)
+  - role: enum('ADMIN','STAFF','CUSTOMER') (Null: NO, Key: , Default: CUSTOMER)
+  - status: enum('ACTIVE','INACTIVE') (Null: NO, Key: , Default: ACTIVE)
+  - created_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
+  - updated_at: timestamp (Null: YES, Key: , Default: CURRENT_TIMESTAMP)
